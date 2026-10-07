@@ -13,7 +13,7 @@ class Element{
  querySelectorAll(query){return this.children.flatMap(c=>[...(c.matches(query)?[c]:[]),...c.querySelectorAll(query)]);}click(){this.clicked++;}closest(){return null;}
 }
 function setup({path='/anchor/review',text='',children=[],query=''}={}){
- const body=new Element('body',text,{},children);globalThis.document={body,querySelectorAll:q=>body.querySelectorAll(q),querySelector:q=>body.querySelectorAll(q)[0]||null,getElementById:()=>null};globalThis.window={};globalThis.location=new URL('https://anchor.douyin.com'+path+query);globalThis.getComputedStyle=e=>({display:'block',visibility:'visible',cursor:e.attrs.cursor||'auto'});
+ const body=new Element('body',text,{},children);globalThis.document={readyState:'complete',body,querySelectorAll:q=>body.querySelectorAll(q),querySelector:q=>body.querySelectorAll(q)[0]||null,getElementById:()=>null};globalThis.window={};globalThis.location=new URL('https://anchor.douyin.com'+path+query);globalThis.getComputedStyle=e=>({display:'block',visibility:'visible',cursor:e.attrs.cursor||'auto'});
  const operation=(action,payload={})=>pageOperation(action,SELECTORS,'REGRESSION',payload);return {body,operation,init(){const info=operation('inspect');operation('init',{live_key:info.live_key});return info;}};
 }
 const menu=(text,attrs={class:'side-menu-item'})=>new Element('div','',attrs,[new Element('span',text)]);

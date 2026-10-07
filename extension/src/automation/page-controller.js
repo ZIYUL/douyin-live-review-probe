@@ -5,6 +5,13 @@ export function pageOperation(action,rules,runId,payload={}){
  const slot='__douyinReviewProbeV02';
  if(action==='cancel'){if(window[slot]?.id===runId)window[slot].cancelled=true;return {status:'CANCELLED'};}
  if(location.protocol!=='https:'||location.hostname!=='anchor.douyin.com')return {status:'WRONG_PAGE'};
+ const routeMatch=/^\/anchor\/review(?:\/|$)/.test(location.pathname)||new RegExp(rules.reviewRoute).test(location.pathname);
+ const pathname=/^\/anchor\/review\/?$/.test(location.pathname)?location.pathname:(routeMatch?'[KNOWN_REVIEW_ROUTE]':'[OTHER_PATH]');
+ const hasDocument=typeof document!=='undefined'&&!!document;
+ const hasBody=hasDocument&&!!document.body;
+ const ready=hasBody&&['interactive','complete'].includes(document.readyState);
+ if(action==='readiness')return {status:ready&&routeMatch?'OK':'DOM_NOT_READY',hostname:location.hostname,pathname,has_document:hasDocument,has_body:hasBody,ready_state:hasDocument?document.readyState:'unavailable',route_match:routeMatch};
+ if(!ready)return {status:'DOM_NOT_READY'};
  const visible=e=>!!e&&!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&getComputedStyle(e).display!=='none';
  const enabled=e=>!e.disabled&&e.getAttribute('aria-disabled')!=='true'&&!e.closest('.ant-pagination-disabled');
  const label=e=>(e.getAttribute('aria-label')||e.innerText||e.textContent||'').replace(/\s+/g,'').trim();
@@ -52,15 +59,15 @@ export function pageOperation(action,rules,runId,payload={}){
  const match=target('text');const tab=match.element;if(match.status==='FOUND'){const controlled=tab.getAttribute('aria-controls');if(controlled&&visible(document.getElementById(controlled)))return document.getElementById(controlled);}
  return null;}
  function bound(which){for(const css of rules[which]){const e=document.querySelector(css);if(e&&visible(e))return e.getAttribute(which==='liveStart'?'data-live-start':'data-live-end')||e.getAttribute('datetime')||e.textContent.trim();}
- const text=document.body.innerText||'';const marker=which==='liveStart'?'(?:直播开始时间|开播时间)':'(?:直播结束时间|下播时间)';const m=text.match(new RegExp(marker+'\\s*[：:]?\\s*(\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}(?::\\d{2})?)'));return m?.[1]||null;}
+ const text=document.body?.innerText||'';const marker=which==='liveStart'?'(?:直播开始时间|开播时间)':'(?:直播结束时间|下播时间)';const m=text.match(new RegExp(marker+'\\s*[：:]?\\s*(\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}(?::\\d{2})?)'));return m?.[1]||null;}
 
  if(action==='inspect'){
- const routeMatch=/^\/anchor\/review(?:\/|$)/.test(location.pathname)||new RegExp(rules.reviewRoute).test(location.pathname);
  const reviewTextFound=/直播复盘/.test(document.body?.innerText||'');
  // Page identity is independent of asynchronously rendered navigation controls.
  const diagnostic={pathname:/^\/anchor\/review\/?$/.test(location.pathname)?location.pathname:(routeMatch?'[KNOWN_REVIEW_ROUTE]':'[OTHER_PATH]'),route_match:routeMatch,review_text_found:reviewTextFound,overview_found:target('overview').status==='FOUND',content_found:target('content').status==='FOUND'};
  return {status:routeMatch||reviewTextFound?'OK':'NOT_REVIEW',page_diagnostic:diagnostic,live_key:liveKey(),live_start:bound('liveStart'),live_end:bound('liveEnd')};
  }
+ if(action==='signature'&&payload.before_init)return {status:'OK',signature:document.body?.childElementCount||0};
  if(action==='init'){window[slot]={id:runId,cancelled:false,liveKey:payload.live_key};return {status:'OK'};}
  const run=window[slot];if(!run||run.id!==runId||run.cancelled)return {status:'CANCELLED'};
  if(run.liveKey!==liveKey())return {status:'LIVE_CHANGED'};
@@ -69,7 +76,7 @@ export function pageOperation(action,rules,runId,payload={}){
  const found=target(payload.id);if(found.status!=='FOUND')return {status:found.status};const e=found.element;if(!enabled(e))return {status:'SKIPPED_DISABLED'};
  e.click();return {status:'CLICKED'};
  }
- if(action==='signature'){const p=panel();return {status:'OK',signature:document.querySelectorAll('[role="tab"][aria-selected="true"]').length+':'+(p?p.childElementCount+':'+p.scrollHeight+':'+p.scrollTop:document.body.childElementCount)};}
+ if(action==='signature'){const p=panel();return {status:'OK',signature:document.querySelectorAll('[role="tab"][aria-selected="true"]').length+':'+(p?p.childElementCount+':'+p.scrollHeight+':'+p.scrollTop:document.body?.childElementCount||0)};}
  if(action==='textReset'||action==='textAdvance'){
  const p=panel();if(!p)return {status:'SKIPPED_NOT_AVAILABLE'};
  const slider=rules.textRange.flatMap(css=>[...p.querySelectorAll(css)]).find(e=>visible(e)&&enabled(e));
@@ -87,18 +94,30 @@ export function pageOperation(action,rules,runId,payload={}){
  }
  return {status:'UNSUPPORTED'};
 }
+function domError(action,payload,error){
+ const text=String(error.exception?.description||error.message||error.text||'');
+ const transient=/execution context.*(?:destroyed|available|found)|cannot find context|context.*(?:destroyed|unavailable)|document.*not ready|inspected target navigated/i.test(text);
+ const type=transient?'CONTEXT_DESTROYED':/TypeError/.test(text)?'TYPE_ERROR':/ReferenceError/.test(text)?'REFERENCE_ERROR':'UNKNOWN';
+ const diagnostic={code:transient?'TRANSIENT_DOM_ERROR':'DOM_ERROR',dom_action:action==='click'?'click:'+payload.id:action,exception_type:type};
+ for(const key of ['lineNumber','columnNumber'])if(Number.isInteger(error[key])&&error[key]>=0)diagnostic[key]=error[key];
+ return Object.assign(Error('PAGE_OPERATION_FAILED'),diagnostic);
+}
 export class PageController{
  constructor(send,tabId,runId,signal){Object.assign(this,{send,tabId,runId,signal});}
  async perform(action,payload={}){if(action!=='cancel')aborted(this.signal);
  const expression=`(${pageOperation.toString()})(${JSON.stringify(action)},${JSON.stringify(SELECTORS)},${JSON.stringify(this.runId)},${JSON.stringify(payload)})`;
- const result=await this.send({tabId:this.tabId},'Runtime.evaluate',{expression,returnByValue:true,awaitPromise:false});
- if(action!=='cancel')aborted(this.signal);if(result.exceptionDetails)throw Object.assign(Error('PAGE_OPERATION_FAILED'),{code:'DOM_ERROR'});
- const value=result.result?.value;if(!value)throw Object.assign(Error('PAGE_UNAVAILABLE'),{code:'DOM_ERROR'});
+ let result;
+ try{result=await this.send({tabId:this.tabId},'Runtime.evaluate',{expression,returnByValue:true,awaitPromise:false});}catch(e){if(action!=='cancel')aborted(this.signal);throw domError(action,payload,e);}
+ if(action!=='cancel')aborted(this.signal);if(result.exceptionDetails)throw domError(action,payload,result.exceptionDetails);
+
+ const value=result.result?.value;if(!value)throw Object.assign(Error('PAGE_UNAVAILABLE'),{code:'DOM_ERROR',dom_action:action,exception_type:'UNKNOWN'});
+ if(value.status==='DOM_NOT_READY'&&action!=='readiness')throw Object.assign(Error('DOM_NOT_READY'),{code:'TRANSIENT_DOM_ERROR',dom_action:action,exception_type:'DOM_NOT_READY'});
  if(['WRONG_PAGE','LIVE_CHANGED','CANCELLED'].includes(value.status)&&action!=='cancel')throw Object.assign(Error(value.status),{code:value.status});return value;
  }
+ readiness(){return this.perform('readiness');}
  inspect(){return this.perform('inspect');}init(value){return this.perform('init',{live_key:value.live_key});}
  async reload(){aborted(this.signal);await this.send({tabId:this.tabId},'Page.reload',{});aborted(this.signal);}
  find(id){return this.perform('find',{id});}click(id){return this.perform('click',{id});}
- signature(){return this.perform('signature').then(r=>r.signature);}
+ signature(beforeInit=false){return this.perform('signature',{before_init:beforeInit}).then(r=>r.signature);}
  textReset(){return this.perform('textReset');}textAdvance(){return this.perform('textAdvance');}cancel(){return this.perform('cancel');}
 }

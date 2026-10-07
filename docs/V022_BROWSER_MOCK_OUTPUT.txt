@@ -1,0 +1,7 @@
+
+> douyin-live-review-probe@0.2.2 test:automation-browser
+> node tests/v02-browser-mock.js
+
+V0.2.1 BROWSER DOM REGRESSIONS PASS: correct route without controls, React four-module parent clicks, pointer parent, ambiguity/no click, wrong page, delayed rendering, safe diagnostics.
+V0.2.2 RELOAD LIFECYCLE PASS: streamed head/body shell/document ready/delayed React controls; readiness polled; single init.
+BROWSER DOM MOCK PASS: actual Chromium DOM clicks, normal frontend HTTPS responses, module order, pagination rewind, 331 records / 110 minutes / coverage=100%, comments, schemas, privacy and ZIP. Extension installation and real Douyin automation are NOT VERIFIED.

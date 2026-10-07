@@ -1,5 +1,5 @@
 import {STEPS} from './selectors.js';
-import {aborted} from './wait-strategy.js';
+import {aborted,inspectReady} from './wait-strategy.js';
 export const STATES=new Set(['IDLE','ATTACHING','CAPTURING','NAVIGATING_OVERVIEW','NAVIGATING_CONTENT','NAVIGATING_AUDIENCE','NAVIGATING_TRAFFIC','COLLECTING_TEXT','COLLECTING_COMMENTS','FINALIZING','COMPLETE','FAILED','STOPPED']);
 const transitions={IDLE:['ATTACHING'],ATTACHING:['CAPTURING'],CAPTURING:['CAPTURING','NAVIGATING_OVERVIEW','COLLECTING_TEXT','NAVIGATING_AUDIENCE'],NAVIGATING_OVERVIEW:['NAVIGATING_CONTENT'],NAVIGATING_CONTENT:['CAPTURING'],COLLECTING_TEXT:['COLLECTING_COMMENTS'],COLLECTING_COMMENTS:['CAPTURING'],NAVIGATING_AUDIENCE:['NAVIGATING_TRAFFIC'],NAVIGATING_TRAFFIC:['FINALIZING'],FINALIZING:['COMPLETE']};
 const terminal=new Set(['COMPLETE','FAILED','STOPPED']);
@@ -9,14 +9,14 @@ export class AutoCollector{
  async run(){
  try{
  await this.transition('ATTACHING');await this.attach(this.abort.signal);aborted(this.abort.signal);
- let page=await this.page.inspect();if(page.page_diagnostic)this.report.page_diagnostic=page.page_diagnostic;if(page.status!=='OK')throw Object.assign(Error('请先进入直播复盘'),{code:'NOT_REVIEW'});
- if(this.navigator.prepare)page=await this.navigator.prepare(page);await this.page.init(page);this.report.live_start=page.live_start;this.report.live_end=page.live_end;await this.transition('CAPTURING');
+ let page=await inspectReady(this.page,{signal:this.abort.signal});if(page.page_diagnostic)this.report.page_diagnostic=page.page_diagnostic;if(page.status!=='OK')throw Object.assign(Error('请先进入直播复盘'),{code:'NOT_REVIEW'});
+ if(this.navigator.prepare)page=await this.navigator.prepare(page);if(page.page_diagnostic)this.report.page_diagnostic=page.page_diagnostic;await this.page.init(page);this.report.live_start=page.live_start;this.report.live_end=page.live_end;await this.transition('CAPTURING');
  for(const step of STEPS){
  aborted(this.abort.signal);await this.transition(step.state);this.report.current_step=step.id;await this.onUpdate(this.report);
  try{
  const result=await this.navigator.visit(step.id);this.report.steps[step.id]=result;
  if(step.id==='text'&&result.status==='PASS')this.report.text_loading=await this.navigator.collectText(()=>this.coverage(page));
- }catch(e){if(this.abort.signal.aborted||['WRONG_PAGE','LIVE_CHANGED','CANCELLED'].includes(e.code))throw e;this.report.steps[step.id]={status:e.code==='TIMEOUT'?'TIMEOUT':'FAIL',reason:e.code||'STEP_ERROR'};this.report.errors.push({step:step.id,reason:e.code||'STEP_ERROR'});}
+ }catch(e){if(this.abort.signal.aborted||['WRONG_PAGE','LIVE_CHANGED','CANCELLED'].includes(e.code))throw e;this.report.steps[step.id]={status:e.code==='TIMEOUT'?'TIMEOUT':'FAIL',reason:e.code||'STEP_ERROR'};this.report.errors.push({step:step.id,reason:e.code||'STEP_ERROR',...safeDOMDiagnostic(e)});}
  await this.onUpdate(this.report);
  }
  await this.transition('FINALIZING');Object.assign(this.report,this.summary(),{text_coverage:this.coverage(page)});
@@ -27,7 +27,7 @@ export class AutoCollector{
  const moduleSuccess=['overview','content','audience','traffic','text'].every(id=>this.report.modules[id].status==='PASS');
  this.report.status=this.report.endpoint_count===0?'FAIL':core&&moduleSuccess&&text.coverage_ratio>=0.95&&!this.report.errors.length&&!this.report.capture_loss_count&&this.report.comment_timeline_count>0?'PASS':'PARTIAL';
  this.report.completion='CURRENT_LIVE_CAPTURE_COMPLETE';await this.transition('COMPLETE');
- }catch(e){const stopped=this.abort.signal.aborted;this.report.state=this.state=stopped?'STOPPED':'FAILED';this.report.status=stopped?'PARTIAL':'FAIL';this.report.errors.push({reason:stopped?'STOPPED_BY_USER':e.code||'AUTO_CAPTURE_ERROR'});}
+ }catch(e){const stopped=this.abort.signal.aborted;this.report.state=this.state=stopped?'STOPPED':'FAILED';this.report.status=stopped?'PARTIAL':'FAIL';this.report.errors.push({reason:stopped?'STOPPED_BY_USER':e.code||'AUTO_CAPTURE_ERROR',...safeDOMDiagnostic(e)});}
  finally{this.report.finished_at=new Date().toISOString();try{await this.page.cancel();}catch{}try{await this.detach();}catch{this.report.status='PARTIAL';this.report.errors.push({reason:'DETACH_ERROR'});}await this.onUpdate(this.report);}
  return this.report;
  }
@@ -35,3 +35,5 @@ export class AutoCollector{
  collectLive(liveReference='current'){if(liveReference!=='current')throw Error('V0.2 只支持当前场');return this.run();}
  collectRecentLives(){throw Error('V0.2 不支持批量历史直播采集');}
 }
+
+function safeDOMDiagnostic(error){const out={};for(const key of ['dom_action','exception_type'])if(typeof error[key]==='string')out[key]=error[key];for(const key of ['lineNumber','columnNumber'])if(Number.isInteger(error[key])&&error[key]>=0)out[key]=error[key];return out;}

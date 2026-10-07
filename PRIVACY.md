@@ -38,3 +38,5 @@ V0.1 用户实机确认安装、采集和 ZIP PASS；V0.2 真实页面自动操�
 字符串 JSON 在正文落盘前最多解析3层并递归清除认证字段；超层 JSON 字符串替换为 [NESTED_JSON_LIMIT]。评论昵称等仍属于诊断业务正文，V0.2 无正式数据库、不新增身份存储系统，也不承诺匿名化全部业务正文。历史摘要只含明确时间与有限数值指标，不含历史身份参数。
 
 停止取消后续动作并发起 detach；已经发出的同步页面动作不能撤销。自由文本脱敏边界仍存在，分享 ZIP 前须人工复核。无外部服务器、上传、AI、定时后台抓取或 Chrome sync。
+
+V0.2.2 reload readiness 只返回 hostname、脱敏 pathname、has_document、has_body、ready_state、route_match 和状态。错误诊断仅保存动作名、异常类型及可选行列号；不保存原始异常描述、页面正文、Query 值、Cookie、Token 或 DOM 对象。直播关联键仍仅在运行内用于防止跨场误操作。

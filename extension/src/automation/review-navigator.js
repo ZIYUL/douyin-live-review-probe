@@ -1,7 +1,16 @@
-import {waitForElement,waitForNetworkQuiet,waitForDOMStable,waitForRoute,aborted} from './wait-strategy.js';
+import {waitForElement,waitForNetworkQuiet,waitForDOMStable,waitForRoute,waitForDOMReady,inspectReady,aborted} from './wait-strategy.js';
 export class ReviewNavigator{
  constructor(page,activity,signal,options={}){Object.assign(this,{page,activity,signal,options});}
- async prepare(info){const before=this.activity.navigation;await this.page.reload();await waitForRoute(()=>this.activity.navigation>before,{signal:this.signal,timeout:this.options.timeout||10000});await waitForElement(async()=>(await this.page.inspect()).status==='OK',{signal:this.signal,timeout:this.options.timeout||10000});const current=await this.page.inspect();if(current.status!=='OK'||current.live_key!==info.live_key)throw Object.assign(Error('LIVE_CHANGED'),{code:'LIVE_CHANGED'});await this.page.init(current);await this.settle();return current;}
+ async prepare(info){
+ const options={signal:this.signal,...this.options,timeout:this.options.timeout||10000};
+ const before=this.activity.navigation;await this.page.reload();await waitForRoute(()=>this.activity.navigation>before,options);
+ await waitForDOMReady(this.page,options);let current=await inspectReady(this.page,options);
+ if(current.status!=='OK')throw Object.assign(Error('NOT_REVIEW'),{code:'NOT_REVIEW'});
+ // Rendering evidence is separate from route identity; absent controls time out later.
+ try{await waitForElement(async()=>{current=await this.page.inspect();const d=current.page_diagnostic;return d?.review_text_found||d?.overview_found||d?.content_found;},options);}catch(e){if(e.code!=='TIMEOUT')throw e;}
+ if(current.live_key!==info.live_key)throw Object.assign(Error('LIVE_CHANGED'),{code:'LIVE_CHANGED'});
+ await waitForNetworkQuiet(this.activity,options);await waitForDOMStable(()=>this.page.signature(true),options);return current;
+ }
  async settle(){await waitForNetworkQuiet(this.activity,{signal:this.signal,...this.options});await waitForDOMStable(()=>this.page.signature(),{signal:this.signal,timeout:this.options.timeout||10000});}
  async visit(id){
  let found;try{await waitForElement(async()=>{found=await this.page.find(id);return ['FOUND','AMBIGUOUS'].includes(found.status);},{signal:this.signal,timeout:this.options.elementTimeout??1500});}catch(e){if(e.code==='TIMEOUT')return {status:'SKIPPED',reason:'SKIPPED_NOT_AVAILABLE'};throw e;}
