@@ -1,3 +1,4 @@
+import {collectTranscript} from './transcript-scroll.js';
 import {waitForElement,waitForNetworkQuiet,waitForDOMStable,waitForRoute,waitForDOMReady,inspectReady,waitUntil,aborted} from './wait-strategy.js';
 export class ReviewNavigator{
  constructor(page,activity,signal,options={}){Object.assign(this,{page,activity,signal,options});}
@@ -18,7 +19,8 @@ export class ReviewNavigator{
  aborted(this.signal);const result=await this.page.click(id);if(result.status!=='CLICKED')return {status:'SKIPPED',reason:result.status};
  await this.settle();return {status:'PASS'};
  }
- async collectText(progress,{maxWindows=120,maxNoProgress=3,maxDuration=240000,onAttempt=async()=>{},responseCount}={}){
+ async collectText(progress,{maxWindows=120,maxNoProgress=3,maxDuration=240000,onAttempt=async()=>{},responseCount,transcriptState}={}){
+ if(transcriptState&&this.page.transcriptFind)return collectTranscript(this.page,progress,transcriptState,()=>this.settle(),this.signal,this.options,{maxWindows,maxNoProgress,maxDuration,onAttempt});
  const now=this.options.now||(()=>Date.now()),started=now(),attempts=[];let windows=0,reason='WINDOW_LIMIT';
  const counts=()=>responseCount?responseCount():this.activity.endpoints?.get('room_stats_content_list')||0;
  const snapshot=async()=>this.page.signature?this.page.signature():null;

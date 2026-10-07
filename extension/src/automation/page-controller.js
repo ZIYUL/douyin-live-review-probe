@@ -1,7 +1,8 @@
+import {transcriptDOM} from './transcript-dom.js';
 import {SELECTORS} from './selectors.js';
 import {aborted} from './wait-strategy.js';
 // Executed only in the selected page. No page-world API calls or arbitrary scripts.
-export function pageOperation(action,rules,runId,payload={}){
+export function pageOperation(action,rules,runId,payload={},transcriptProbe=null){
  const slot='__douyinReviewProbeV02';
  if(action==='cancel'){if(window[slot]?.id===runId)window[slot].cancelled=true;return {status:'CANCELLED'};}
  if(location.protocol!=='https:'||location.hostname!=='anchor.douyin.com')return {status:'WRONG_PAGE'};
@@ -82,6 +83,7 @@ export function pageOperation(action,rules,runId,payload={}){
  if(action==='init'){window[slot]={id:runId,cancelled:false,liveKey:payload.live_key};return {status:'OK'};}
  const run=window[slot];if(!run||run.id!==runId||run.cancelled)return {status:'CANCELLED'};
  if(run.liveKey!==liveKey())return {status:'LIVE_CHANGED'};
+ if(action==='transcriptFind'||action==='transcriptScroll')return transcriptProbe(action==='transcriptScroll'?'scroll':'find');
  if(action==='find')return {status:target(payload.id).status};
  if(action==='click'){
  const found=target(payload.id);if(found.status!=='FOUND')return {status:found.status};const e=found.element;if(!enabled(e))return {status:'SKIPPED_DISABLED'};
@@ -153,7 +155,7 @@ function domError(action,payload,error){
 export class PageController{
  constructor(send,tabId,runId,signal){Object.assign(this,{send,tabId,runId,signal});}
  async perform(action,payload={}){if(action!=='cancel')aborted(this.signal);
- const expression=`(${pageOperation.toString()})(${JSON.stringify(action)},${JSON.stringify(SELECTORS)},${JSON.stringify(this.runId)},${JSON.stringify(payload)})`;
+ const expression=`(${pageOperation.toString()})(${JSON.stringify(action)},${JSON.stringify(SELECTORS)},${JSON.stringify(this.runId)},${JSON.stringify(payload)},${transcriptDOM.toString()})`;
  let result;
  try{result=await this.send({tabId:this.tabId},'Runtime.evaluate',{expression,returnByValue:true,awaitPromise:false});}catch(e){if(action!=='cancel')aborted(this.signal);throw domError(action,payload,e);}
  if(action!=='cancel')aborted(this.signal);if(result.exceptionDetails)throw domError(action,payload,result.exceptionDetails);
@@ -167,6 +169,7 @@ export class PageController{
  async reload(){aborted(this.signal);await this.send({tabId:this.tabId},'Page.reload',{});aborted(this.signal);}
  find(id){return this.perform('find',{id});}click(id){return this.perform('click',{id});}
  signature(beforeInit=false){return this.perform('signature',{before_init:beforeInit}).then(r=>r.signature);}
+ transcriptFind(){return this.perform('transcriptFind');}transcriptScroll(){return this.perform('transcriptScroll');}
  textDiagnostic(){return this.perform('textDiagnostic');}
  textReset(excluded=[]){return this.perform('textReset',{excluded});}textAdvance(excluded=[]){return this.perform('textAdvance',{excluded});}cancel(){return this.perform('cancel');}
 }

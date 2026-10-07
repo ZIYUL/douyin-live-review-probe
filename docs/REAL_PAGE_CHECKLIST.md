@@ -1,15 +1,11 @@
-# V0.2.3 实机验收（待用户完成）
+# V0.2.4 实机验收
 
-V0.2.2 自动化主链已经用户实机证明可用；本次只验证新增窗口诊断、控件机制与报告/分享修复。
-
-1. 更新未打包扩展到0.2.3，保持 debugger / activeTab 权限；正常登录并打开当前场复盘，点一次自动采集。
-2. 核对 page_diagnostic_initial 与 ready；正常刷新后继续导航，未出现旧 NOT_REVIEW / 空body DOM_ERROR。
-3. 检查 room_stats_content_list 每次 metadata.safe_business_context 的内容类型与 ISO start/end，必须无 roomID/账号/认证值及原始 Query。
-4. 检查 text_control_diagnostic 是否包含真实 slider/分页/滚动结构；任意DOM文本、昵称、话术正文不能在指纹中出现。
-5. 检查 text_loading.attempts 的方法、状态、记录增量和 network_response_delta；完全无效机制必须停止并转试有限下一机制。确认没有自动播放视频或改 video.currentTime。
-6. 对照真实整场起止与文字覆盖；可推进则目标≥95%，仍仅30分钟应PARTIAL并保留足够证据，不能凭首尾跨度宣布全覆盖。
-7. 核对 prefetch 端点模块归属；fans 歧义安全跳过但 fans_group_pie 已捕获时数据仍 PREFETCH_OBSERVED。
-8. 核对核心/辅助 capture loss：仅辅助丢失只告警；核心丢失影响PASS。
-9. 评论无可归属响应应 NOT_OBSERVED；可靠类型的空响应 AVAILABLE_EMPTY；有评论结构 OBSERVED；缺控件 NOT_AVAILABLE。未知数字枚举不能猜评论类型。
-10. 分别导出本地和可分享诊断包。确认可分享包指定ID、昵称、头像及明确账号name被删除，话术/时间/经营指标保留；本地缓存与原始业务导出不变。可分享包不是公共匿名数据包，分享前复核。
-11. 确认停止后不继续操作，手动采集/JSON/Schema/IndexedDB/ZIP维持既有行为。回传可分享ZIP与结果字段，勿提供认证信息。
+1. 更新未打包扩展到0.2.4，保持debugger/activeTab权限；正常登录当前直播复盘，仅点一次自动采集。
+2. 确认attach在reload前，原四模块导航和prefetch保持。文字阶段不得以slider、视频或页面主滚动区作为路线。
+3. 检查text_loading.scroll_container状态TRANSCRIPT_SCROLL_CONTAINER_CONFIRMED：行数≥3，祖先深度、scroll/client尺寸符合实际文字内部列表。不能选BODY/HTML/页面MAIN/整个内容分析区。
+4. 检查transcript_scroll_attempts：80%增量、type4计数及start/end实际变化才WINDOW_ADVANCED。前几次只有SCROLLED或DOM_PROGRESS_ONLY允许继续，完全无进展有限停止。
+5. 核对第一个type4窗口覆盖直播10:06:32附近；缺失必须TRANSCRIPT_START_WINDOW_MISSING。窗口正常逐段向后直到11:56:38附近。
+6. 核对full_transcript_timeline：记录明显>90、至少2个连续窗口、coverage≥95%；minute_trend正常、core_capture_loss_count=0，才CURRENT_LIVE_AUTO_CAPTURE PASS。
+7. 仅DOM已加载但Network未捕获的缓存文字不能计入正文，到结束仍缺数据应PARTIAL_CACHED_BEFORE_CAPTURE。
+8. 确认当前type4、单一说话人/占位userID/空secUid/20秒口播结构为SPEECH_TRANSCRIPT_CANDIDATE，不增加comment_timeline_count。无真实评论证据为NOT_OBSERVED，不猜type1/type2。
+9. 手动、Schema、ZIP、IndexedDB、share-safe保持。分享包仍包含话术/经营指标，复核后回传允许的窗口/滚动尝试/结构诊断，勿提供认证信息。
