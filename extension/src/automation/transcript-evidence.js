@@ -1,3 +1,4 @@
+import {sampleExpectedTimes} from './expected-transcript-times.js';
 import {parseTime} from '../lib/time-series-detector.js';
 import {textCoverage} from '../lib/live-summary.js';
 export function speechEvidence(rows,type){
@@ -18,5 +19,5 @@ export function transcriptSnapshot(session,run,page={}){
  const first=windows[0];const start=parseTime(liveStart);const firstStart=parseTime(first?.startTime);
  const missing=Number.isFinite(start)&&(!Number.isFinite(firstStart)||Math.abs(firstStart-start)>60000);
  const sequence=windows.length>0&&windows.every((w,i)=>parseTime(w.endTime)>=parseTime(w.startTime)&&(!i||(parseTime(w.startTime)>=parseTime(windows[i-1].startTime)&&parseTime(w.startTime)<=parseTime(windows[i-1].endTime)+60000&&parseTime(w.endTime)>parseTime(windows[i-1].endTime))));
- return {window_sequence_valid:sequence,type4_request_count:metadata.length,windows,latest_window:windows.at(-1)||null,window_count:windows.length,record_count:records.length,first_time:records[0]?.contentTime||null,last_time:records.at(-1)?.contentTime||null,coverage_ratio:coverage.coverage_ratio,coverage,start_window_missing:missing,live_end:coverage.live_end};
+ return {expected_times:sampleExpectedTimes(records.map(r=>r.contentTime)),window_sequence_valid:sequence,type4_request_count:metadata.length,windows,latest_window:windows.at(-1)||null,window_count:windows.length,record_count:records.length,first_time:records[0]?.contentTime||null,last_time:records.at(-1)?.contentTime||null,coverage_ratio:coverage.coverage_ratio,coverage,start_window_missing:missing,live_end:coverage.live_end};
 }

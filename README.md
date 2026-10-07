@@ -1,16 +1,18 @@
-# Douyin Live Review Probe V0.2.4
+# Douyin Live Review Probe V0.2.4.1
 
-V0.2.4 以用户实机证明的「文字记录内部列表滚动→type=4约30分钟窗口懒加载」为自动文字主路线。从至少3条重复时间戳记录反查最近滚动祖先，不使用第一个可滚动DIV；不以slider、时间picker或视频为主路线。既有Network/debugger/reload/prefetch保留。详见 [验证报告](docs/TEST_RESULTS.md)。
+V0.2.4.1 修复昵称与时间戳同处一个文本节点导致的列表定位失败：从已捕获 contentTime 选取最多12个前/中/末时间点（北京时间）辅助匹配；确认至少3条递增、每行唯一合法时间戳的记录，再选择最近安全滚动祖先。失败诊断只返回计数，不保存昵称或正文。用户 V0.2.4 实机仍为单窗口90条、覆盖约26.9%，本补丁等待实机确认。
+
+V0.2.4.1 以用户实机证明的「文字记录内部列表滚动→type=4约30分钟窗口懒加载」为自动文字主路线。从至少3条重复时间戳记录反查最近滚动祖先，不使用第一个可滚动DIV；不以slider、时间picker或视频为主路线。既有Network/debugger/reload/prefetch保留。详见 [验证报告](docs/TEST_RESULTS.md)。
 
 抖音主播中心直播复盘数据探针。保留 V0.1 的 Manifest V3 / chrome.debugger / Network.responseReceived / Network.getResponseBody、本地诊断缓存、手动模式和 ZIP 导出，新增「自动采集当前直播」。无 AI、主动业务 API 请求、重放、自动登录、批量历史采集或云上传。
 
-**当前 V0.2.4：PARTIAL，等待实机。** 原有83项加新增14项，97项单元测试通过；本地Chromium列表lazy-load及旧回归通过。用户已验证 V0.2.2 在真实 Mac Chrome 完成自动化主链：33 endpoints、39 JSON，文字只覆盖约26.9%；用户另已证明正常滚动列表触发type=4的11:06:32–11:36:31窗口（北京时间）、90条文字；本次自动定位和滚动能否在真实页面推进仍待验证。[V0.2.2 实机基线](docs/V0_2_2_REAL_BASELINE.md)。
+**当前 V0.2.4.1：PARTIAL，等待实机。** 原有97项加新增8项，105项单元测试通过；本地Chromium列表lazy-load及旧回归通过。用户已验证 V0.2.2 在真实 Mac Chrome 完成自动化主链：33 endpoints、39 JSON，文字只覆盖约26.9%；用户另已证明正常滚动列表触发type=4的11:06:32–11:36:31窗口（北京时间）、90条文字；本次自动定位和滚动能否在真实页面推进仍待验证。[V0.2.2 实机基线](docs/V0_2_2_REAL_BASELINE.md)。
 
 V0.1 已由用户在 Mac Chrome、正常登录主播中心的真实复盘页验证安装 / attach / 正文读取 / JSON / ZIP / 当前性能 PASS。用户报告约 463 Network Response、55 JSON、33 Endpoint Group；不会推翻该基线。详见 [实机基线](docs/V0_1_REAL_BASELINE.md)，该结论不等于 V0.2 自动化验收。
 
 ## 安装与升级
 
-1. 解压 `Douyin_Live_Review_Probe_V0.2.4_Extension.zip`，找到 `extension` 目录，无需 npm 安装或构建。
+1. 解压 `Douyin_Live_Review_Probe_V0.2.4.1_Extension.zip`，找到 `extension` 目录，无需 npm 安装或构建。
 2. Mac / Windows Chrome：Chrome → 扩展程序 → 管理扩展程序（`chrome://extensions`）→ 开发者模式 → 加载已解压的扩展程序 → 选择 `extension`。
 3. Edge：`edge://extensions` → 开发人员模式 → 加载解压缩的扩展 → 选择 `extension`。
 4. Chrome/Edge 内核 ≥118，Safari 不支持。固定扩展到工具栏。
@@ -96,7 +98,7 @@ npm run test:automation-browser
 - popup/、storage/：界面及现有缓存。
 - mocks/、tests/、docs/：虚构样本、自动测试、验证与验收文档。
 
-[测试报告](docs/TEST_RESULTS.md)区分已验证的 V0.2.2 用户实机基线、本地 Mock 与待验证的 V0.2.4 列表机制。下一步按[实机验收清单](docs/REAL_PAGE_CHECKLIST.md)回传真实文字窗口与控件证据。
+[测试报告](docs/TEST_RESULTS.md)区分已验证的 V0.2.2 用户实机基线、本地 Mock 与待验证的 V0.2.4.1 列表机制。下一步按[实机验收清单](docs/REAL_PAGE_CHECKLIST.md)回传真实文字窗口与控件证据。
 
 ## 诊断与分享
 
@@ -110,7 +112,7 @@ npm run test:automation-browser
 
 **可分享包仍可能包含主播话术及经营指标，不是完全匿名的公共数据包。** 无法自动识别任意自由文本中的身份信息；分享前请复核业务内容。
 
-## V0.2.4 transcript 主链
+## V0.2.4.1 transcript 主链
 
 用户真实手动滚动触发room_stats_content_list，type=4，窗口2026-09-30T03:06:32Z–03:36:31Z，90条，正文11:06:35–11:36:17（中国标准时间），中位间隔20秒。它证明列表滚动会推进窗口，不证明本扩展已自动定位真实列表。
 

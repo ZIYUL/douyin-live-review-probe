@@ -1,5 +1,5 @@
 
-> douyin-live-review-probe@0.2.4 test:security
+> douyin-live-review-probe@0.2.4.1 test:security
 > node tests/security-check.js
 
-SECURITY_CHECK PASS: 30 extension files; no network API, request replay, remote scripts, private keys; permissions, imports, no video manipulation/auth access/global wildcard scan checked. Mock fixtures contain explicitly fake sentinel values only. This is not proof for arbitrary real response contents.
+SECURITY_CHECK PASS: 31 extension files; no network API, request replay, remote scripts, private keys; permissions, imports, no video manipulation/auth access/global wildcard scan checked. Mock fixtures contain explicitly fake sentinel values only. This is not proof for arbitrary real response contents.

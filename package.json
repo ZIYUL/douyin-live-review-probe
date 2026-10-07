@@ -1,10 +1,10 @@
 {
   "name": "douyin-live-review-probe",
-  "version": "0.2.4",
+  "version": "0.2.4.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js && node tests/v021.test.js && node tests/v022.test.js && node tests/v023.test.js && node tests/v024.test.js",
+    "test": "node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js && node tests/v021.test.js && node tests/v022.test.js && node tests/v023.test.js && node tests/v024.test.js && node tests/v0241.test.js",
     "test:browser": "node tests/browser-smoke.js",
     "test:security": "node tests/security-check.js",
     "test:automation-browser": "node tests/v02-browser-mock.js && node tests/v02-browser-mock.js --transcript"

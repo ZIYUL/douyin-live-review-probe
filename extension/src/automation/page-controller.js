@@ -1,3 +1,4 @@
+import {safeExpectedTimes} from './expected-transcript-times.js';
 import {transcriptDOM} from './transcript-dom.js';
 import {SELECTORS} from './selectors.js';
 import {aborted} from './wait-strategy.js';
@@ -83,7 +84,7 @@ export function pageOperation(action,rules,runId,payload={},transcriptProbe=null
  if(action==='init'){window[slot]={id:runId,cancelled:false,liveKey:payload.live_key};return {status:'OK'};}
  const run=window[slot];if(!run||run.id!==runId||run.cancelled)return {status:'CANCELLED'};
  if(run.liveKey!==liveKey())return {status:'LIVE_CHANGED'};
- if(action==='transcriptFind'||action==='transcriptScroll')return transcriptProbe(action==='transcriptScroll'?'scroll':'find');
+ if(action==='transcriptFind'||action==='transcriptScroll')return transcriptProbe(action==='transcriptScroll'?'scroll':'find',payload.expectedTimes||[]);
  if(action==='find')return {status:target(payload.id).status};
  if(action==='click'){
  const found=target(payload.id);if(found.status!=='FOUND')return {status:found.status};const e=found.element;if(!enabled(e))return {status:'SKIPPED_DISABLED'};
@@ -169,7 +170,7 @@ export class PageController{
  async reload(){aborted(this.signal);await this.send({tabId:this.tabId},'Page.reload',{});aborted(this.signal);}
  find(id){return this.perform('find',{id});}click(id){return this.perform('click',{id});}
  signature(beforeInit=false){return this.perform('signature',{before_init:beforeInit}).then(r=>r.signature);}
- transcriptFind(){return this.perform('transcriptFind');}transcriptScroll(){return this.perform('transcriptScroll');}
+ transcriptFind(expectedTimes=[]){return this.perform('transcriptFind',{expectedTimes:safeExpectedTimes(expectedTimes)});}transcriptScroll(expectedTimes=[]){return this.perform('transcriptScroll',{expectedTimes:safeExpectedTimes(expectedTimes)});}
  textDiagnostic(){return this.perform('textDiagnostic');}
  textReset(excluded=[]){return this.perform('textReset',{excluded});}textAdvance(excluded=[]){return this.perform('textAdvance',{excluded});}cancel(){return this.perform('cancel');}
 }

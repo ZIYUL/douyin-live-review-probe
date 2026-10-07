@@ -1,27 +1,22 @@
-# V0.2.4 验证报告
+# V0.2.4.1 验证报告
 
-DOUYIN_LIVE_REVIEW_PROBE_V0_2_4 = **PARTIAL**：本地验证通过，等待真实Mac Chrome。
+DOUYIN_LIVE_REVIEW_PROBE_V0_2_4_1 = **PARTIAL**：本地通过，真实 Mac Chrome 未验证。
 
-基线：6bd7e7363c4ca6c78f7e7b19dfaa34fa27775133。用户实机证明文字列表正常滚动触发type=4约30分钟窗口：2026-09-30T03:06:32Z–03:36:31Z（北京时间11:06:32–11:36:31），90条，实际文字11:06:35–11:36:17，中位20秒。此为主路线证据，不是本版本自动化实机PASS。
+基线：d0a50b6458d58d60a0021a4b1d73706a1587ac2f。用户 V0.2.4 实机口播分类正确，90条/单窗口/约26.9%，但 TRANSCRIPT_SCROLL_CONTAINER_NOT_FOUND 且无滚动尝试。本补丁仅修容器发现及安全参数/诊断传递。
 
-## 验证
+- 原97项继续PASS，新增8项，105/105单元测试PASS。
+- 新回归：昵称内嵌时间戳、多时间大父节点拒绝、已捕获时间点匹配优先、至少3条唯一递增兄弟记录、最近536px祖先与MAIN拒绝、失败纯计数、前中末最多12个CST时间及输入过滤、缓存未见窗口兼容和参数传递。
+- 真实Chromium DOM回归PASS：嵌入昵称标题、时间匹配、最近滚动祖先、诱饵和多时间节点拒绝；不保存自由文本。
+- 本地HTTPS完整Mock PASS：4个正常前端type4窗口，331条/110分钟/100%覆盖。既有分页、slider兼容、reload、取消、模块导航、安全导出回归PASS。
+- SECURITY_CHECK PASS：31个扩展文件，权限保持，无主动业务API/重放、视频操作、认证访问或远程脚本；imports有效。
+- ZIP含31个extension文件，CRC、源文件逐字节及manifest0.2.4.1检查PASS；SHA256见V0241_ZIP_CHECK.txt。
 
-- 原有83项全部继续PASS；新增14项，合计97/97单元测试PASS。
-- 新增覆盖：type4口播/占位身份不计评论、其它type与真实非占位ID未知、多窗口合并去重、四窗口95%以上、起始缺失、窗口count与范围联合判据、重复窗口不能冒充推进、DOM缓存推进不补正文、无进展有限停止、lazy阈值前物理滚动、有界次数、评论独立状态及缺起始仍PARTIAL、无主动API/视频/坐标操作。
-- 真实Chromium DOM：最近行祖先、前置诱饵忽略、页面MAIN拒绝、80%增量、React分拆时间戳、无正文诊断。
-- 完整本地HTTPS列表Mock：4个正常前端type4窗口，331条/110分钟/覆盖100%；每个推进通过真实Network响应及safe_business_context确认，不由扩展构造时间请求。
-- 旧Chromium身份/React点击/reload生命周期/分页/role slider/取消/跨场回归保留通过。旧文字机制在测试中显式走兼容分支，生产自动主链仅结构确认列表滚动，不以slider或任意DIV兜底。
-- SECURITY_CHECK PASS：30个扩展文件，无新增权限、API构造/重放、视频操控、认证访问、远程脚本或私钥；imports有效。git diff --check PASS。
-- ZIP只含30个extension文件；CRC/manifest0.2.4/SHA-256校验见V024_ZIP_CHECK.txt。
+## 修复边界
 
-## 完整性与安全边界
+已捕获口播contentTime按前/中/末采样最多12个合法北京时间字符串。页面端允许时间戳嵌入昵称文本，每行必须只有一个唯一合法时间，至少3条兄弟行递增。匹配已捕获时间的组优先；未见缓存窗口保留既有结构判断。最近滚动祖先与BODY/HTML/MAIN/全分析区域排除保持。
 
-正文只由已正常捕获的type4、符合当前口播结构证据的Response形成派生full_transcript_timelines；仅content/contentTime，按时间去重，既有IndexedDB不重构。full_transcript_timeline输出窗口数、记录数、首末时间和真实覆盖率。
+失败 transcript_find_diagnostic 只含 expected_time_count、expected_time_matches、timestamp_nodes_found、row_candidates_found、row_groups_found、scrollable_ancestors_found 六项计数。成功附已验证时间和数量，不附昵称、正文或DOM对象。
 
-只有type4新响应且start/end变化才WINDOW_ADVANCED/TRANSCRIPT_WINDOW_ADVANCED。DOM可见时间或物理位置推进可有限继续等待lazy加载，不计正式正文；缓存到直播结束且仍缺捕获为PARTIAL_CACHED_BEFORE_CAPTURE。第一窗口距live_start超过60秒或无合法窗口，TRANSCRIPT_START_WINDOW_MISSING。多窗口顺序与范围不连续、无真实窗口推进均不能完整PASS。
+Network/debugger/reload、80%增量滚动、lazy等待、WINDOW_ADVANCED、窗口合并、95%覆盖及起始窗口判据均保持；评论自动化未新增。
 
-主链PASS要求核心接口/分钟趋势有效、四模块及文字导航通过、核心loss0、至少2个连续type4窗口并有真实推进、记录>90且覆盖≥95%、起始窗口正确；评论可独立NOT_OBSERVED，不阻塞满足全部证据的主链。既有非新主链回归的评论规则保持。
-
-type4只有合法递增contentTime、非空口播、单一nickname、占位用户ID/空secUid、15–25秒中位间隔才SPEECH_TRANSCRIPT_CANDIDATE。明确身份或不匹配结构不强判，type1/type2仍UNKNOWN。诊断不记录nickname/ID的值或任意全文，只保存结构/时间/数量/布尔及允许状态。
-
-REAL_PAGE_VERIFICATION = NOT VERIFIED，等待用户实机。Linux Chromium本地CDP Mock不等于真实Mac Chrome扩展安装及登录页面验收。请按REAL_PAGE_CHECKLIST.md复测，仍缺窗口时回传可分享诊断而不是宣布全量。
+REAL_PAGE_VERIFICATION = NOT VERIFIED，等待用户实机。Linux Chromium/CDP Mock不等于真实Mac Chrome登录页面与扩展安装验收。
