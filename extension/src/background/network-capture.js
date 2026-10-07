@@ -1,3 +1,4 @@
+import {safeRoomStatsContext} from '../lib/room-stats-context.js';
 import {observeBusiness} from '../automation/session-analysis.js';
 import {sanitizeURL,sanitize} from '../lib/sanitizer.js';
 import {classify,parseBody,sizePolicy} from '../lib/response-classifier.js';
@@ -14,4 +15,4 @@ export async function capture(s,m,result){
  if(schema)observeBusiness(s,m,clean,schema);
  await groupCapture(s,m,['SAVE','SAVE_LARGE'].includes(m.body_status)?body:undefined,schema);
 }
-export function metadata(params,method,rules,allowlist={}){const r=params.response;const u=sanitizeURL(r.url,allowlist);const m={...u,method,mime:r.mimeType,type:params.type,status:r.status,captured_at:new Date().toISOString(),response_size:r.encodedDataLength||0};m.classification=classify(m,rules);return m;}
+export function metadata(params,method,rules,allowlist={}){const r=params.response;const u=sanitizeURL(r.url,allowlist);const m={...u,method,mime:r.mimeType,type:params.type,status:r.status,captured_at:new Date().toISOString(),response_size:r.encodedDataLength||0};const context=safeRoomStatsContext(r.url);if(Object.keys(context).length)m.safe_business_context=context;m.classification=classify(m,rules);return m;}

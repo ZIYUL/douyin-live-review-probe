@@ -1,25 +1,25 @@
 
-> douyin-live-review-probe@0.2.2 test
-> node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js && node tests/v021.test.js && node tests/v022.test.js
+> douyin-live-review-probe@0.2.3 test
+> node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js && node tests/v021.test.js && node tests/v022.test.js && node tests/v023.test.js
 
-✔ JSON 与文本判断 / base64 / binary (1.440427ms)
-✔ URL 去 query value / credentials / fragment (1.483913ms)
-✔ 敏感字段递归过滤 / 文本 / 嵌入 URL (0.583888ms)
-✔ 字段并集 / 数组检测 / 分钟间隔 (7.46361ms)
-✔ content + contentTime 文本时间轴 / 20 秒 (1.355479ms)
-✔ 不依赖时间字段名称 / 无序拒绝 / 数值指标拒绝 (0.279601ms)
-✔ 分类 STATIC (0.34591ms)
-✔ 分类 IMAGE (0.076746ms)
-✔ 分类 VIDEO_AUDIO (0.184127ms)
-✔ 分类 TELEMETRY (0.154212ms)
-✔ 分类 OUT_OF_SCOPE (0.15279ms)
-✔ 分类 BUSINESS_CANDIDATE (0.148644ms)
-✔ 可配置埋点 (0.087231ms)
-✔ 大小限制精确边界 (0.081463ms)
-✔ Endpoint grouping / 内容不同不会覆盖 / 重复去重 (6.558568ms)
-✔ 会话容量上限保留 metadata (0.663178ms)
-✔ capture → inventory → ZIP 脱敏整链 (5.50999ms)
-✔ 权限最小 / 无外部脚本 / 命令白名单 (0.193762ms)
+✔ JSON 与文本判断 / base64 / binary (1.367357ms)
+✔ URL 去 query value / credentials / fragment (1.268239ms)
+✔ 敏感字段递归过滤 / 文本 / 嵌入 URL (0.531069ms)
+✔ 字段并集 / 数组检测 / 分钟间隔 (8.636956ms)
+✔ content + contentTime 文本时间轴 / 20 秒 (0.482436ms)
+✔ 不依赖时间字段名称 / 无序拒绝 / 数值指标拒绝 (0.280832ms)
+✔ 分类 STATIC (0.307232ms)
+✔ 分类 IMAGE (0.072158ms)
+✔ 分类 VIDEO_AUDIO (0.180932ms)
+✔ 分类 TELEMETRY (3.391623ms)
+✔ 分类 OUT_OF_SCOPE (0.158738ms)
+✔ 分类 BUSINESS_CANDIDATE (0.136526ms)
+✔ 可配置埋点 (0.097697ms)
+✔ 大小限制精确边界 (0.082735ms)
+✔ Endpoint grouping / 内容不同不会覆盖 / 重复去重 (5.568618ms)
+✔ 会话容量上限保留 metadata (0.341685ms)
+✔ capture → inventory → ZIP 脱敏整链 (5.950643ms)
+✔ 权限最小 / 无外部脚本 / 命令白名单 (0.210907ms)
 ℹ tests 18
 ℹ suites 0
 ℹ pass 18
@@ -27,14 +27,14 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 34.712247
-✔ 后台开始 / 加载结束取正文 / 跳过图片 / 本地持久化 (15.731158ms)
-✔ 正文不可读保留 metadata，不持久化错误原文 (0.674715ms)
-✔ 停止立即 detach，停止后事件无效 (0.735216ms)
-✔ 错误域名拒绝，清空本地缓存 (0.534274ms)
-✔ 顶层页面导航范围外自动 detach (0.363246ms)
-✔ 开始 attach 尚未完成时停止，不能重新进入采集 (0.633964ms)
-✔ V0.2 后台自动启动、异步状态更新和停止，无队列死锁 (12.346025ms)
+ℹ duration_ms 34.625629
+✔ 后台开始 / 加载结束取正文 / 跳过图片 / 本地持久化 (13.417147ms)
+✔ 正文不可读保留 metadata，不持久化错误原文 (0.723779ms)
+✔ 停止立即 detach，停止后事件无效 (0.400243ms)
+✔ 错误域名拒绝，清空本地缓存 (0.394884ms)
+✔ 顶层页面导航范围外自动 detach (0.361263ms)
+✔ 开始 attach 尚未完成时停止，不能重新进入采集 (0.520423ms)
+✔ V0.2 后台自动启动、异步状态更新和停止，无队列死锁 (12.583614ms)
 ℹ tests 7
 ℹ suites 0
 ℹ pass 7
@@ -42,25 +42,25 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 35.812402
-✔ 状态机完整顺序 / 自动 detach / CURRENT_LIVE_CAPTURE_COMPLETE (7.055886ms)
-✔ 用户停止取消后续点击并 detach (0.403227ms)
-✔ 未进入直播复盘安全停止，不执行导航 (0.303536ms)
-✔ 部分模块不存在继续完成且 PARTIAL / 评论 NOT AVAILABLE (0.799483ms)
-✔ 单步 timeout 继续其他步骤且 PARTIAL (0.57176ms)
-✔ network quiet 必须等待 minimum、请求结束及正文处理 (0.323747ms)
-✔ 等待策略 timeout / endpoint / route / abort (0.645151ms)
-✔ Selector 不存在一次超时，绝不点击 (100.718276ms)
-✔ 文字加载无新记录，有限次结束 (0.432892ms)
-✔ 文字覆盖率不能仅靠首尾伪造完整 / 跨块间隙 (0.660293ms)
-✔ nested JSON 二次 Schema / 3 层限制 / 无效字符串 (8.478476ms)
-✔ 字符串 JSON 中认证字段在保存前删除，包括深层 (0.785552ms)
-✔ safe query 默认空 / 精确人工枚举 / 身份强制拒绝 (0.899152ms)
-✔ 评论候选根据正文结构，不根据接口名 / 乱序或两条也支持 (0.277878ms)
-✔ HistoryLiveSummary 从嵌套历史结构提取日期与有限指标，不保留身份 (0.540994ms)
-✔ 跨 Response 文字合并 / 本次 run 摘要 / inventory 导出 (4.816427ms)
-✔ 自动化不发主动 API 请求 / 保留 V0.1 权限 (0.45879ms)
-✔ V0.3 批量接口明确不实现 (0.171448ms)
+ℹ duration_ms 33.189137
+✔ 状态机完整顺序 / 自动 detach / CURRENT_LIVE_CAPTURE_COMPLETE (6.045747ms)
+✔ 用户停止取消后续点击并 detach (0.456837ms)
+✔ 未进入直播复盘安全停止，不执行导航 (0.245739ms)
+✔ 部分模块不存在继续完成且 PARTIAL / 评论 NOT AVAILABLE (3.896453ms)
+✔ 单步 timeout 继续其他步骤且 PARTIAL (0.680503ms)
+✔ network quiet 必须等待 minimum、请求结束及正文处理 (0.367623ms)
+✔ 等待策略 timeout / endpoint / route / abort (0.588055ms)
+✔ Selector 不存在一次超时，绝不点击 (101.373679ms)
+✔ 文字加载无新记录，有限次结束 (1.172995ms)
+✔ 文字覆盖率不能仅靠首尾伪造完整 / 跨块间隙 (1.008527ms)
+✔ nested JSON 二次 Schema / 3 层限制 / 无效字符串 (8.22766ms)
+✔ 字符串 JSON 中认证字段在保存前删除，包括深层 (0.887946ms)
+✔ safe query 默认空 / 精确人工枚举 / 身份强制拒绝 (1.006895ms)
+✔ 评论候选根据正文结构，不根据接口名 / 乱序或两条也支持 (0.171789ms)
+✔ HistoryLiveSummary 从嵌套历史结构提取日期与有限指标，不保留身份 (0.413251ms)
+✔ 跨 Response 文字合并 / 本次 run 摘要 / inventory 导出 (5.101035ms)
+✔ 自动化不发主动 API 请求 / 保留 V0.1 权限 (0.509106ms)
+✔ V0.3 批量接口明确不实现 (0.205349ms)
 ℹ tests 18
 ℹ suites 0
 ℹ pass 18
@@ -68,18 +68,18 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 133.975382
-✔ 正确 /anchor/review 无按钮仍 OK，身份不依赖 selector (2.175323ms)
-✔ React 右侧四模块 span 文本 / 父 div 点击 (3.51651ms)
-✔ 非 button span 使用最近 pointer/tabindex/role 可点击父级 (1.104812ms)
-✔ 两个同名目标 AMBIGUOUS，不随机点击；稳定 selector 也不能掩盖歧义 (0.361294ms)
-✔ 错误 /other 无复盘特征 NOT_REVIEW，安全诊断不保存 Query (0.406521ms)
-✔ 异步未渲染 / 控件缺失由导航阶段 SKIPPED，页面始终 OK (100.923049ms)
-✔ 文字必须精确匹配，不点整体数据说明/大页面容器/无点击标记 span (0.652943ms)
-✔ 祖先最多 6 层，隐藏目标不参与歧义 (0.915477ms)
-✔ 已知 review/replay 路由命中，不能模糊匹配 review-other (0.476978ms)
-✔ AMBIGUOUS 导航立即 SKIPPED，不能点击或随机重试 (0.758481ms)
-✔ NOT_REVIEW 报告保留安全诊断，不保留 live_key / query 身份 (7.175596ms)
+ℹ duration_ms 139.485192
+✔ 正确 /anchor/review 无按钮仍 OK，身份不依赖 selector (2.462626ms)
+✔ React 右侧四模块 span 文本 / 父 div 点击 (3.927409ms)
+✔ 非 button span 使用最近 pointer/tabindex/role 可点击父级 (1.217121ms)
+✔ 两个同名目标 AMBIGUOUS，不随机点击；稳定 selector 也不能掩盖歧义 (0.474965ms)
+✔ 错误 /other 无复盘特征 NOT_REVIEW，安全诊断不保存 Query (0.346732ms)
+✔ 异步未渲染 / 控件缺失由导航阶段 SKIPPED，页面始终 OK (101.192276ms)
+✔ 文字必须精确匹配，不点整体数据说明/大页面容器/无点击标记 span (0.713313ms)
+✔ 祖先最多 6 层，隐藏目标不参与歧义 (1.320767ms)
+✔ 已知 review/replay 路由命中，不能模糊匹配 review-other (0.373542ms)
+✔ AMBIGUOUS 导航立即 SKIPPED，不能点击或随机重试 (0.264258ms)
+✔ NOT_REVIEW 报告保留安全诊断，不保留 live_key / query 身份 (3.347377ms)
 ℹ tests 11
 ℹ suites 0
 ℹ pass 11
@@ -87,19 +87,19 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 124.419579
-✔ null body readiness reports DOM_NOT_READY without scanning (1.521019ms)
-✔ document absent is safe (0.189265ms)
-✔ loading body does not trigger control scanning (0.121283ms)
-✔ interactive and complete readiness passes with safe diagnostics (0.229385ms)
-✔ body appears at 600ms, bounded polling observes ready (0.526252ms)
-✔ DOM readiness timeout is bounded (0.748316ms)
-✔ destroyed execution context retries inspect (0.808246ms)
-✔ permanent TypeError fails with action and sanitized coordinates (0.313902ms)
-✔ Runtime send rejection classifies click action without raw error (0.452441ms)
-✔ null body during bound and signature never raises TypeError (0.828597ms)
-✔ prepare waits React evidence and does not initialize (102.294737ms)
-✔ collector owns one init and preserves permanent DOM failure diagnostic (4.375813ms)
+ℹ duration_ms 121.220671
+✔ null body readiness reports DOM_NOT_READY without scanning (1.332505ms)
+✔ document absent is safe (0.147081ms)
+✔ loading body does not trigger control scanning (0.116105ms)
+✔ interactive and complete readiness passes with safe diagnostics (0.216115ms)
+✔ body appears at 600ms, bounded polling observes ready (0.285169ms)
+✔ DOM readiness timeout is bounded (0.545471ms)
+✔ destroyed execution context retries inspect (0.707545ms)
+✔ permanent TypeError fails with action and sanitized coordinates (0.869819ms)
+✔ Runtime send rejection classifies click action without raw error (0.301995ms)
+✔ null body during bound and signature never raises TypeError (0.765071ms)
+✔ prepare waits React evidence and does not initialize (100.950932ms)
+✔ collector owns one init and preserves permanent DOM failure diagnostic (3.739878ms)
 ℹ tests 12
 ℹ suites 0
 ℹ pass 12
@@ -107,4 +107,29 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 118.575582
+ℹ duration_ms 115.164949
+✔ prefetch 正确归属四模块，step 与 prefetch 可同时观察 (16.059132ms)
+✔ aux BODY_UNAVAILABLE 只产生 warning，不增加 core loss (0.444098ms)
+✔ core BODY_UNAVAILABLE 增加 core loss，且按 run 隔离 (0.238819ms)
+✔ roomStatsContentType 只接受短枚举，拒绝自由文本、凭据、重复键 (1.181578ms)
+✔ roomID 与所有身份凭据永远不保存值，endpoint 专用规则 (0.285019ms)
+✔ 合法 start/end 转 ISO，支持中国墙上时间与 epoch (0.580183ms)
+✔ 非法日期、时间、时区、重复 start 不保存 (0.353221ms)
+✔ metadata 持久化 normalized safe_business_context，不保存 raw query (0.597229ms)
+✔ text attempts 精确记录 reset/advance、new records 与 Network delta (2.141512ms)
+✔ slider 完全无 Network 效果后切换机制，有限停止 (0.865382ms)
+✔ comments 四态，不把未知类型或无 Response 误判空 (4.391347ms)
+✔ 相同 text content type 空 Response 不能作为 comments 空证据 (0.901606ms)
+✔ fans AMBIGUOUS 与 prefetch 数据状态独立 (0.470809ms)
+✔ share-safe ZIP 删除身份字段、账号 name、嵌套身份，保留业务话术和指标 name (3.841159ms)
+✔ share-safe export 不修改原始 session 或本地诊断包 (0.64434ms)
+✔ 整体 PASS 允许 aux loss + 空评论 / 无评论控件；core loss 或未知评论 PARTIAL (2.637068ms)
+✔ share-safe 不将业务 content/name 的字面值误认为身份字段 (0.858021ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43.295652

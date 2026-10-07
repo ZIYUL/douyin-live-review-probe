@@ -1,17 +1,30 @@
-# V0.2.2 补丁验证
+# V0.2.3 验证报告
 
-DOUYIN_LIVE_REVIEW_PROBE_V0_2_2 = **PARTIAL**（本地验证通过，等待真实 Mac Chrome 验证）
+DOUYIN_LIVE_REVIEW_PROBE_V0_2_3 = **PARTIAL**：本地全部通过，新增文字机制等待用户实机。
 
-基线：37bb85c9f30f67145d921d3b8a247bf8845e51b8。用户实机已确认 V0.2.1 页面身份与模块发现通过，本次不改选择器、Debugger Network 或导出架构。
+## 基线与范围
 
-修复：reload 导航后先等待 document/body 与 interactive/complete，再 inspect，等待 React 复盘证据，等待 DOM 稳定，最后由 AutoCollector 单次 init。空 body/缺 document 返回 DOM_NOT_READY；执行上下文销毁在有界等待中重试。永久 TypeError/ReferenceError 不重试，报告包含安全动作与异常类型。控件缺失交给后续导航跳过，不能误报 NOT_REVIEW。
+基线 e5c8ae5296d211f4594c6e06505cddad464c85ca。用户真实 Mac Chrome 已验证 V0.2.2 自动化主链 COMPLETE / PARTIAL，33 endpoints、39 JSON，文字90条/约26.9%。详情见 [实机基线](V0_2_2_REAL_BASELINE.md)。本次不修改 debugger attach、Network事件/正文读取、IndexedDB、Grouping、Schema detector、覆盖率算法、V0.2.2 readiness等待；仅在已有 metadata 中追加安全业务上下文和证据。
 
-- 原有54项 + 新增12项 = 66项单元回归全部通过。
-- 新增：空 body、无 document、loading 无扫描、interactive/complete、600ms延迟、超时边界、上下文重试、永久错误、动作诊断、bound/signature保护、React等待、单次初始化。
-- 真实 Chromium 本地 HTTPS Mock：流式 head（body 缺失）→200ms body空壳→400ms文档完成→600ms React模块渲染；自动采集通过，331条话术、110分钟、覆盖率100%，评论、四模块、取消及跨场保护通过。测试延迟只存在于 Mock。
-- SECURITY_CHECK PASS：24个扩展文件，无主动请求/接口重放/远程脚本/私钥，权限与模块导入检查通过。
-- ZIP 仅包含 extension 文件；历史版本与 Git 历史保留。
+## 本地结果
 
-REAL_PAGE_VERIFICATION = NOT VERIFIED，等待用户实机。当地浏览器测试未安装扩展，不替代登录抖音与真实 Mac Chrome 验证。
+- npm test：原有66项全部通过，新增17项，合计83/83 PASS。
+- 新增覆盖：四模块prefetch及子步骤归属、辅助/核心丢包与run隔离、安全枚举/身份拒绝/合法及非法时间/重复键、metadata安全上下文、逐动作计数与response delta、无效slider方法有限切换、评论四态与未知枚举保守判断、fans歧义+prefetch、Share-safe ZIP匿名化（含Schema身份路径、嵌套账号name）、原本地数据不变、整体PASS规则。
+- Chromium真实DOM回归：role/Ant slider键盘 Home/ArrowRight/PageDown/End、机制排除、脱敏结构指纹、局部fans精确查找/歧义、video未触碰。
+- 既有V0.2.1身份/React父节点点击及V0.2.2流式reload生命周期回归通过：无body→body空壳→ready→延迟React菜单；仅一次init。
+- 两种完整本地HTTPS Mock均PASS：分页回退/推进；role slider键盘动作触发正常网页窗口响应。各331条话术/110分钟/覆盖率100%，模块导航、评论、取消与跨场守卫继续通过。Mock前端允许fetch，仅扩展禁止主动请求。
+- Safe fingerprint最多600结构节点/80候选，白名单标签；真实DOM注入的PRIVATE字段/话术及长随机class不进入指纹。
+- SECURITY_CHECK PASS：27个扩展文件，零新增权限，无主动API/重放/远程脚本/私钥/认证访问/全页通配扫描/视频操控；imports有效。
+- git diff --check PASS。安装ZIP只包含27个extension文件，manifest版本0.2.3；ZIP CRC与SHA-256另见V023_ZIP_CHECK.txt。
 
-请更新未打包扩展至0.2.2，重新加载扩展和真实复盘页面，再点自动采集。检查是否越过 reload 并进入模块步骤；若失败，回传安全 dom_action、exception_type、page_diagnostic。
+## 报告规则与限制
+
+预加载与对应步骤证据分开：PREFETCH_OBSERVED / STEP_OBSERVED / STEP_AND_PREFETCH_OBSERVED；子模块来源通过step_sources明确记录。fans导航歧义不否定fans_group_pie预加载数据。核心minute_trend/overview_v3/room_stats_content_list/entrance_v2丢正文影响PASS，辅助丢失仅capture_warnings。
+
+评论未知数字/字符串枚举不猜语义。AVAILABLE_EMPTY要求当前comments步骤出现空series，且同一host/path的同一安全内容类型已被本地会话真实评论结构证实；旧run只提供类型含义证明，其正文/数量不计为本run成功。预加载的本run评论候选也可OBSERVED；无响应仍NOT_OBSERVED。
+
+text_loading.attempts记录每个动作、方法、计数、response delta、签名变化、覆盖变化与耗时；无Network/记录效果的方法有限停止并尝试下一已识别机制。额外结构指纹不包含全文；没有可靠面板时只给有限结构诊断，不盲目点击。
+
+page_diagnostic_initial取reload后初次可用DOM，ready在React等待和DOM稳定后重新inspect；兼容page_diagnostic指向ready。可分享导出不修改缓存和本地原始诊断包，删除指定账号字段和明确账号name。话术及经营指标仍保留，不是完全匿名公共数据包。
+
+REAL_PAGE_VERIFICATION = NOT VERIFIED，等待用户实机。环境为Linux Chromium，本地Mock直接使用CDP而未安装扩展；不等同真实Mac Chrome登录页面验证。不能由Mock100%推断真实文字已完整。真实仍约30分钟时必须PARTIAL，回传安全窗口、attempts与fingerprint后再定位。

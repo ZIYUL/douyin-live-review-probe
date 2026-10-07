@@ -1,3 +1,4 @@
+import {shareSafe} from './share-safe.js';
 const enc=new TextEncoder();
 function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
 export function zip(files){
@@ -9,12 +10,13 @@ export function zip(files){
  }
  const len=central.reduce((n,a)=>n+a.length,0);const [end,v]=header(22);v.setUint32(0,0x06054b50,true);v.setUint16(8,Object.keys(files).length,true);v.setUint16(10,Object.keys(files).length,true);v.setUint32(12,len,true);v.setUint32(16,offset,true);return new Blob([...chunks,...central,end],{type:'application/zip'});
 }
-export function exportFiles(raw){
- const s=structuredClone(raw),stamp=new Date().toISOString().replace(/[-:]/g,'').replace('T','_').slice(0,15),root='DouyinProbe_'+stamp,files={};const put=(path,value)=>files[root+'/'+path]=typeof value==='string'?value:JSON.stringify(value,null,2);
- put('README.txt','本诊断包不包含 Cookie、Authorization、Token、密码或完整 Request Headers。正文已按规则脱敏；业务数据仍可能包含个人信息，请导出者人工复核后再分享。仅本地采集，不包含完整 HAR。');
+export function exportFiles(raw,{shareSafe:sharing=false}={}){
+ const s=sharing?shareSafe(structuredClone(raw)):structuredClone(raw),stamp=new Date().toISOString().replace(/[-:]/g,'').replace('T','_').slice(0,15),root='DouyinProbe_'+stamp+(sharing?'_ShareSafe':''),files={};const put=(path,value)=>files[root+'/'+path]=typeof value==='string'?value:JSON.stringify(value,null,2);
+ put('EXPORT_MODE.json',{mode:sharing?'SHARE_SAFE':'LOCAL',contains_business_data:true});
+ put('README.txt',sharing?'可分享诊断包：已额外删除账号身份字段；仍包含主播话术与经营指标，不是完全匿名的公共数据包。分享前请复核。':'本诊断包不包含 Cookie、Authorization、Token、密码或完整 Request Headers。正文已按规则脱敏；业务数据仍可能包含个人信息，请导出者人工复核后再分享。仅本地采集，不包含完整 HAR。');
  const inventory=Object.values(s.endpoints).map((e,i)=>{
- const name=(e.name.replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,80)||'endpoint')+'_'+String(i+1).padStart(3,'0');
- const versions=e.versions.map((v,j)=>{const path='responses/'+name+(j?'_v'+(j+1):'')+(v.response_type==='json'?'.json':'.txt');put(path,v.body);return {...v,body:undefined,file:path};});
+ const name=((e.name||'endpoint').replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,80)||'endpoint')+'_'+String(i+1).padStart(3,'0');
+ const versions=e.versions.map((v,j)=>{const path='responses/'+name+(j?'_v'+(j+1):'')+(v.response_type==='json'?'.json':'.txt');const body=typeof v.body==='string'?v.body:'[IDENTITY_REDACTED]';put(path,body);return {...v,hash:sharing?undefined:v.hash,size:sharing?enc.encode(body).length:v.size,body:undefined,file:path,share_safe:sharing||undefined};});
  put('schemas/'+name+'.schema.json',e.schemas);
  const arrays=e.schema?.arrays||[];return {...e,versions,top_level_keys:e.schema?.top_level_keys||[],arrays,time_series:arrays.find(a=>a.time_series.detected)?.time_series||{detected:false},text_timeline:arrays.find(a=>a.text_timeline)?.text_timeline||false,comment_timeline:arrays.find(a=>a.comment_timeline)?.comment_timeline||false,nested_json_detected:e.schema?.nested_json_detected||false,nested_json_paths:e.schema?.nested_json_paths||[]};
  });
