@@ -1,14 +1,16 @@
-# Douyin Live Review Probe V0.2
+# Douyin Live Review Probe V0.2.1
+
+V0.2.1 仅修复真实 Mac Chrome 报告的 `NOT_REVIEW` 误判和 React 导航控件发现，不增加采集功能。`/anchor/review` 身份判断独立于按钮是否渲染；支持精确文字 div/span 及最多6层可点击父容器，同名歧义返回 `AMBIGUOUS` 并跳过。报告增加安全 `page_diagnostic`，不含 Query/身份值。详见 [补丁验证报告](docs/TEST_RESULTS.md)。
 
 抖音主播中心直播复盘数据探针。保留 V0.1 的 Manifest V3 / chrome.debugger / Network.responseReceived / Network.getResponseBody、本地诊断缓存、手动模式和 ZIP 导出，新增「自动采集当前直播」。无 AI、主动业务 API 请求、重放、自动登录、批量历史采集或云上传。
 
-**当前 V0.2：PARTIAL。** 自动测试与真实 Chromium DOM 的本地 Mock 自动操作已验证；真实抖音 V0.2 自动化：**NOT VERIFIED ON REAL DOUYIN PAGE**。
+**当前 V0.2.1：PARTIAL。** 自动测试与真实 Chromium DOM 的本地 Mock 自动操作已验证；真实抖音 V0.2 自动化：**NOT VERIFIED ON REAL DOUYIN PAGE**。
 
 V0.1 已由用户在 Mac Chrome、正常登录主播中心的真实复盘页验证安装 / attach / 正文读取 / JSON / ZIP / 当前性能 PASS。用户报告约 463 Network Response、55 JSON、33 Endpoint Group；不会推翻该基线。详见 [实机基线](docs/V0_1_REAL_BASELINE.md)，该结论不等于 V0.2 自动化验收。
 
 ## 安装与升级
 
-1. 解压 `Douyin_Live_Review_Probe_V0.2_Extension.zip`，找到 `extension` 目录，无需 npm 安装或构建。
+1. 解压 `Douyin_Live_Review_Probe_V0.2.1_Extension.zip`，找到 `extension` 目录，无需 npm 安装或构建。
 2. Mac / Windows Chrome：Chrome → 扩展程序 → 管理扩展程序（`chrome://extensions`）→ 开发者模式 → 加载已解压的扩展程序 → 选择 `extension`。
 3. Edge：`edge://extensions` → 开发人员模式 → 加载解压缩的扩展 → 选择 `extension`。
 4. Chrome/Edge 内核 ≥118，Safari 不支持。固定扩展到工具栏。

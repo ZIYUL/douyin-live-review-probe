@@ -4,7 +4,8 @@ export class ReviewNavigator{
  async prepare(info){const before=this.activity.navigation;await this.page.reload();await waitForRoute(()=>this.activity.navigation>before,{signal:this.signal,timeout:this.options.timeout||10000});await waitForElement(async()=>(await this.page.inspect()).status==='OK',{signal:this.signal,timeout:this.options.timeout||10000});const current=await this.page.inspect();if(current.status!=='OK'||current.live_key!==info.live_key)throw Object.assign(Error('LIVE_CHANGED'),{code:'LIVE_CHANGED'});await this.page.init(current);await this.settle();return current;}
  async settle(){await waitForNetworkQuiet(this.activity,{signal:this.signal,...this.options});await waitForDOMStable(()=>this.page.signature(),{signal:this.signal,timeout:this.options.timeout||10000});}
  async visit(id){
- try{await waitForElement(async()=> (await this.page.find(id)).status==='FOUND',{signal:this.signal,timeout:this.options.elementTimeout??1500});}catch(e){if(e.code==='TIMEOUT')return {status:'SKIPPED',reason:'SKIPPED_NOT_AVAILABLE'};throw e;}
+ let found;try{await waitForElement(async()=>{found=await this.page.find(id);return ['FOUND','AMBIGUOUS'].includes(found.status);},{signal:this.signal,timeout:this.options.elementTimeout??1500});}catch(e){if(e.code==='TIMEOUT')return {status:'SKIPPED',reason:'SKIPPED_NOT_AVAILABLE'};throw e;}
+ if(found.status==='AMBIGUOUS')return {status:'SKIPPED',reason:'AMBIGUOUS'};
  aborted(this.signal);const result=await this.page.click(id);if(result.status!=='CLICKED')return {status:'SKIPPED',reason:result.status};
  await this.settle();return {status:'PASS'};
  }

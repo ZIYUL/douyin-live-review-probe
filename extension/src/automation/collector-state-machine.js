@@ -9,7 +9,7 @@ export class AutoCollector{
  async run(){
  try{
  await this.transition('ATTACHING');await this.attach(this.abort.signal);aborted(this.abort.signal);
- let page=await this.page.inspect();if(page.status!=='OK')throw Object.assign(Error('请先进入直播复盘'),{code:'NOT_REVIEW'});
+ let page=await this.page.inspect();if(page.page_diagnostic)this.report.page_diagnostic=page.page_diagnostic;if(page.status!=='OK')throw Object.assign(Error('请先进入直播复盘'),{code:'NOT_REVIEW'});
  if(this.navigator.prepare)page=await this.navigator.prepare(page);await this.page.init(page);this.report.live_start=page.live_start;this.report.live_end=page.live_end;await this.transition('CAPTURING');
  for(const step of STEPS){
  aborted(this.abort.signal);await this.transition(step.state);this.report.current_step=step.id;await this.onUpdate(this.report);

@@ -1,25 +1,25 @@
 
-> douyin-live-review-probe@0.2.0 test
-> node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js
+> douyin-live-review-probe@0.2.1 test
+> node tests/core.test.js && node tests/background.test.js && node tests/v02.test.js && node tests/v021.test.js
 
-✔ JSON 与文本判断 / base64 / binary (1.600308ms)
-✔ URL 去 query value / credentials / fragment (1.319125ms)
-✔ 敏感字段递归过滤 / 文本 / 嵌入 URL (0.497619ms)
-✔ 字段并集 / 数组检测 / 分钟间隔 (7.689851ms)
-✔ content + contentTime 文本时间轴 / 20 秒 (1.247917ms)
-✔ 不依赖时间字段名称 / 无序拒绝 / 数值指标拒绝 (0.283937ms)
-✔ 分类 STATIC (0.304648ms)
-✔ 分类 IMAGE (0.096375ms)
-✔ 分类 VIDEO_AUDIO (0.172199ms)
-✔ 分类 TELEMETRY (0.155243ms)
-✔ 分类 OUT_OF_SCOPE (0.147882ms)
-✔ 分类 BUSINESS_CANDIDATE (0.166711ms)
-✔ 可配置埋点 (0.087452ms)
-✔ 大小限制精确边界 (0.080791ms)
-✔ Endpoint grouping / 内容不同不会覆盖 / 重复去重 (5.19028ms)
-✔ 会话容量上限保留 metadata (0.615596ms)
-✔ capture → inventory → ZIP 脱敏整链 (4.76559ms)
-✔ 权限最小 / 无外部脚本 / 命令白名单 (0.203016ms)
+✔ JSON 与文本判断 / base64 / binary (1.252735ms)
+✔ URL 去 query value / credentials / fragment (1.188308ms)
+✔ 敏感字段递归过滤 / 文本 / 嵌入 URL (0.56474ms)
+✔ 字段并集 / 数组检测 / 分钟间隔 (7.625573ms)
+✔ content + contentTime 文本时间轴 / 20 秒 (1.366897ms)
+✔ 不依赖时间字段名称 / 无序拒绝 / 数值指标拒绝 (0.395385ms)
+✔ 分类 STATIC (0.419612ms)
+✔ 分类 IMAGE (0.080571ms)
+✔ 分类 VIDEO_AUDIO (0.307352ms)
+✔ 分类 TELEMETRY (0.138929ms)
+✔ 分类 OUT_OF_SCOPE (0.169875ms)
+✔ 分类 BUSINESS_CANDIDATE (0.650909ms)
+✔ 可配置埋点 (0.080472ms)
+✔ 大小限制精确边界 (0.077657ms)
+✔ Endpoint grouping / 内容不同不会覆盖 / 重复去重 (5.143179ms)
+✔ 会话容量上限保留 metadata (0.376467ms)
+✔ capture → inventory → ZIP 脱敏整链 (5.967899ms)
+✔ 权限最小 / 无外部脚本 / 命令白名单 (0.256226ms)
 ℹ tests 18
 ℹ suites 0
 ℹ pass 18
@@ -27,14 +27,14 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 29.669583
-✔ 后台开始 / 加载结束取正文 / 跳过图片 / 本地持久化 (12.543985ms)
-✔ 正文不可读保留 metadata，不持久化错误原文 (0.540383ms)
-✔ 停止立即 detach，停止后事件无效 (0.480513ms)
-✔ 错误域名拒绝，清空本地缓存 (0.422456ms)
-✔ 顶层页面导航范围外自动 detach (3.627788ms)
-✔ 开始 attach 尚未完成时停止，不能重新进入采集 (0.547654ms)
-✔ V0.2 后台自动启动、异步状态更新和停止，无队列死锁 (12.045695ms)
+ℹ duration_ms 31.239112
+✔ 后台开始 / 加载结束取正文 / 跳过图片 / 本地持久化 (14.32304ms)
+✔ 正文不可读保留 metadata，不持久化错误原文 (0.574475ms)
+✔ 停止立即 detach，停止后事件无效 (0.380032ms)
+✔ 错误域名拒绝，清空本地缓存 (0.406532ms)
+✔ 顶层页面导航范围外自动 detach (0.515496ms)
+✔ 开始 attach 尚未完成时停止，不能重新进入采集 (0.524579ms)
+✔ V0.2 后台自动启动、异步状态更新和停止，无队列死锁 (12.181398ms)
 ℹ tests 7
 ℹ suites 0
 ℹ pass 7
@@ -42,25 +42,25 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 34.385499
-✔ 状态机完整顺序 / 自动 detach / CURRENT_LIVE_CAPTURE_COMPLETE (5.394557ms)
-✔ 用户停止取消后续点击并 detach (0.586632ms)
-✔ 未进入直播复盘安全停止，不执行导航 (0.309586ms)
-✔ 部分模块不存在继续完成且 PARTIAL / 评论 NOT AVAILABLE (0.546142ms)
-✔ 单步 timeout 继续其他步骤且 PARTIAL (0.381063ms)
-✔ network quiet 必须等待 minimum、请求结束及正文处理 (0.38577ms)
-✔ 等待策略 timeout / endpoint / route / abort (0.481455ms)
-✔ Selector 不存在一次超时，绝不点击 (101.511043ms)
-✔ 文字加载无新记录，有限次结束 (0.424298ms)
-✔ 文字覆盖率不能仅靠首尾伪造完整 / 跨块间隙 (0.613373ms)
-✔ nested JSON 二次 Schema / 3 层限制 / 无效字符串 (7.371542ms)
-✔ 字符串 JSON 中认证字段在保存前删除，包括深层 (0.699883ms)
-✔ safe query 默认空 / 精确人工枚举 / 身份强制拒绝 (0.812362ms)
-✔ 评论候选根据正文结构，不根据接口名 / 乱序或两条也支持 (0.247322ms)
-✔ HistoryLiveSummary 从嵌套历史结构提取日期与有限指标，不保留身份 (0.395605ms)
-✔ 跨 Response 文字合并 / 本次 run 摘要 / inventory 导出 (7.774317ms)
-✔ 自动化不发主动 API 请求 / 保留 V0.1 权限 (0.409246ms)
-✔ V0.3 批量接口明确不实现 (0.18649ms)
+ℹ duration_ms 33.771902
+✔ 状态机完整顺序 / 自动 detach / CURRENT_LIVE_CAPTURE_COMPLETE (5.751443ms)
+✔ 用户停止取消后续点击并 detach (0.359561ms)
+✔ 未进入直播复盘安全停止，不执行导航 (0.379891ms)
+✔ 部分模块不存在继续完成且 PARTIAL / 评论 NOT AVAILABLE (0.628606ms)
+✔ 单步 timeout 继续其他步骤且 PARTIAL (0.3989ms)
+✔ network quiet 必须等待 minimum、请求结束及正文处理 (0.342395ms)
+✔ 等待策略 timeout / endpoint / route / abort (0.525451ms)
+✔ Selector 不存在一次超时，绝不点击 (100.516794ms)
+✔ 文字加载无新记录，有限次结束 (0.48499ms)
+✔ 文字覆盖率不能仅靠首尾伪造完整 / 跨块间隙 (0.675546ms)
+✔ nested JSON 二次 Schema / 3 层限制 / 无效字符串 (7.058581ms)
+✔ 字符串 JSON 中认证字段在保存前删除，包括深层 (0.728977ms)
+✔ safe query 默认空 / 精确人工枚举 / 身份强制拒绝 (0.83767ms)
+✔ 评论候选根据正文结构，不根据接口名 / 乱序或两条也支持 (0.20562ms)
+✔ HistoryLiveSummary 从嵌套历史结构提取日期与有限指标，不保留身份 (0.447603ms)
+✔ 跨 Response 文字合并 / 本次 run 摘要 / inventory 导出 (4.874264ms)
+✔ 自动化不发主动 API 请求 / 保留 V0.1 权限 (0.495826ms)
+✔ V0.3 批量接口明确不实现 (0.160271ms)
 ℹ tests 18
 ℹ suites 0
 ℹ pass 18
@@ -68,4 +68,23 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 133.323469
+ℹ duration_ms 129.871381
+✔ 正确 /anchor/review 无按钮仍 OK，身份不依赖 selector (2.102874ms)
+✔ React 右侧四模块 span 文本 / 父 div 点击 (3.293595ms)
+✔ 非 button span 使用最近 pointer/tabindex/role 可点击父级 (0.995568ms)
+✔ 两个同名目标 AMBIGUOUS，不随机点击；稳定 selector 也不能掩盖歧义 (0.43214ms)
+✔ 错误 /other 无复盘特征 NOT_REVIEW，安全诊断不保存 Query (0.370307ms)
+✔ 异步未渲染 / 控件缺失由导航阶段 SKIPPED，页面始终 OK (100.720562ms)
+✔ 文字必须精确匹配，不点整体数据说明/大页面容器/无点击标记 span (0.629527ms)
+✔ 祖先最多 6 层，隐藏目标不参与歧义 (0.865782ms)
+✔ 已知 review/replay 路由命中，不能模糊匹配 review-other (3.913007ms)
+✔ AMBIGUOUS 导航立即 SKIPPED，不能点击或随机重试 (0.288585ms)
+✔ NOT_REVIEW 报告保留安全诊断，不保留 live_key / query 身份 (3.14333ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.206299
