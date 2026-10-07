@@ -1,0 +1,1 @@
+SECURITY_CHECK PASS: 14 extension files; no network API, request replay, remote scripts, private keys; permissions and imports checked. Mock fixtures contain explicitly fake sentinel values only. This is not proof for arbitrary real response contents.

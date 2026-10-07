@@ -1,0 +1,36 @@
+{
+  "code": 0,
+  "data": {
+    "series": [
+      {
+        "timeMinute": "2026-09-01 10:00:00",
+        "showCnt": "100",
+        "watchUcnt": "20",
+        "pcuTotal": "12",
+        "leaveUcnt": "2",
+        "commentCnt": "3",
+        "likeCnt": "8"
+      },
+      {
+        "timeMinute": "2026-09-01 10:01:00",
+        "showCnt": "101",
+        "watchUcnt": "21",
+        "pcuTotal": "12",
+        "leaveUcnt": "2",
+        "commentCnt": "3",
+        "likeCnt": "8",
+        "followUcnt": "1"
+      },
+      {
+        "timeMinute": "2026-09-01 10:02:00",
+        "showCnt": "102",
+        "watchUcnt": "22",
+        "pcuTotal": "12",
+        "leaveUcnt": "2",
+        "commentCnt": "3",
+        "likeCnt": "8",
+        "followUcnt": "1"
+      }
+    ]
+  }
+}

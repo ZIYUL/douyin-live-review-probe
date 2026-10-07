@@ -1,0 +1,17 @@
+import {exportFiles,zip} from '../lib/exporter.js';
+const $=id=>document.getElementById(id);let active;
+async function request(type,extra={}){const r=await chrome.runtime.sendMessage({type,...extra});if(!r?.ok)throw Error(r?.error||'后台未响应');return r;}
+function pre(value){const p=document.createElement('pre');p.textContent=typeof value==='string'?value:JSON.stringify(value,null,2);return p;}
+async function refresh(){try{
+ [active]=await chrome.tabs.query({active:true,currentWindow:true});let page='不可访问';try{const u=new URL(active.url);page=u.hostname+u.pathname;}catch{}$('page').textContent='当前标签页：'+page;
+ const r=await request('status'),s=r.session,c=s.counters;const endpoints=Object.values(s.endpoints);
+ $('status').textContent=r.tabId===null?'● 未采集':'● 正在采集标签页 '+r.tabId;$('start').disabled=r.tabId!==null;$('stop').disabled=r.tabId===null;
+ const stats={'Network Response':c.Network||0,'JSON Response':c.BUSINESS_JSON||0,'业务候选':endpoints.length,'时间序列候选':endpoints.filter(e=>e.schema?.arrays.some(a=>a.time_series.detected)).length,'文字时间轴候选':endpoints.filter(e=>e.schema?.arrays.some(a=>a.text_timeline)).length,'忽略静态':c.STATIC||0,'忽略图片':c.IMAGE||0,'忽略媒体':c.VIDEO_AUDIO||0,'忽略埋点':c.TELEMETRY||0,'范围外':c.OUT_OF_SCOPE||0,'未保存正文':s.droppedBodies,'缓存 MB':(s.bodyBytes/1048576).toFixed(1)};
+ $('stats').replaceChildren(...Object.entries(stats).map(([k,v])=>{const d=document.createElement('div');d.textContent=k+' '+v;return d;}));
+ $('list').replaceChildren(...endpoints.map(e=>{const d=document.createElement('details'),summary=document.createElement('summary');summary.textContent=e.name+' · captures: '+e.captures+' · '+(e.schema?.arrays.some(a=>a.text_timeline)?'TEXT_TIMELINE_CANDIDATE':e.schema?.arrays.some(a=>a.time_series.detected)?'TIME_SERIES':'UNKNOWN');d.append(summary);d.addEventListener('toggle',()=>{if(!d.open||d.childElementCount>1)return;d.append(pre({...e,versions:e.versions.map(v=>({...v,preview:undefined}))}));for(const [i,v]of e.versions.entries()){const h=document.createElement('p');h.textContent='Response '+(i+1)+' · '+v.size+' bytes';d.append(h,pre(v.preview));}});return d;}));
+ if(document.activeElement!==$('hosts'))$('hosts').value=s.rules.businessHosts.join('\n');if(document.activeElement!==$('telemetry'))$('telemetry').value=s.rules.telemetryHosts.join('\n');$('large').checked=s.allowLarge;
+ }catch(e){$('error').textContent=e.message;}}
+for(const [id,type]of [['start','start'],['stop','stop'],['clear','clear']])$(id).onclick=async()=>{try{if(type==='clear'&&!confirm('清空全部本地采集记录？此操作不可恢复。'))return;await request(type,{tabId:active?.id});$('error').textContent='';await refresh();}catch(e){$('error').textContent=e.message;}};
+$('settings').onclick=async()=>{try{await request('settings',{rules:{businessHosts:$('hosts').value.split(/\s+/).filter(Boolean),telemetryHosts:$('telemetry').value.split(/\s+/).filter(Boolean)},allowLarge:$('large').checked});$('error').textContent='设置已保存';}catch(e){$('error').textContent=e.message;}};
+$('export').onclick=async()=>{try{const r=await request('export');const {root,files}=exportFiles(r.session);const url=URL.createObjectURL(zip(files)),a=document.createElement('a');a.href=url;a.download=root+'.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}catch(e){$('error').textContent=e.message;}};
+refresh();setInterval(()=>{if(!document.querySelector('details[open]')&&!['TEXTAREA','INPUT'].includes(document.activeElement.tagName))refresh();},2500);
