@@ -1,4 +1,4 @@
-function time(v){
+export function parseTime(v){
  if(typeof v==='number'||/^\d{10,13}$/.test(String(v))){const n=Number(v);return n>=946684800&&n<4102444800?n*1000:n>=946684800000&&n<4102444800000?n:NaN;}
  if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(v))return NaN;
  // 未带时区的抖音墙上时间，按中国标准时间解释。
@@ -8,7 +8,7 @@ const median=a=>{const b=[...a].sort((x,y)=>x-y);return b.length?(b[Math.floor((
 export function detectTimeline(rows,fields){
  let best={detected:false};
  for(const field of fields){
- const values=rows.map(r=>time(r?.[field]));const valid=values.filter(Number.isFinite);
+ const values=rows.map(r=>parseTime(r?.[field]));const valid=values.filter(Number.isFinite);
  if(valid.length<3||valid.length/rows.length<0.8)continue;
  const deltas=valid.slice(1).map((v,i)=>(v-valid[i])/1000);
  const monotonic=deltas.every(d=>d>=0),positive=deltas.filter(d=>d>0);

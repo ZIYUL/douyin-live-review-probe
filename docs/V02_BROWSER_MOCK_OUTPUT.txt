@@ -1,0 +1,1 @@
+BROWSER DOM MOCK PASS: actual Chromium DOM clicks, normal frontend HTTPS responses, module order, pagination rewind, 331 records / 110 minutes / coverage=100%, comments, schemas, privacy and ZIP. Extension installation and real Douyin automation are NOT VERIFIED.

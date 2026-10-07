@@ -23,4 +23,18 @@ JSON 递归删除名称包含 Cookie、Authorization、Token、密码、验证�
 
 默认 ≤5 MiB 正文保存，5–20 MiB 需用户开启设置，>20 MiB 不保存正文；总正文上限 100 MiB。请求/响应 headers 不落盘，错误只存通用类别，不持久化可能含完整 URL 的浏览器错误原文。
 
-浏览器调试权限提示条由 Chrome/Edge 管理。Popup 关闭不代表停止，使用「停止采集」或浏览器「取消调试」。再次启动浏览器不自动 attach。真实抖音页面状态：NOT VERIFIED ON REAL DOUYIN PAGE。
+浏览器调试权限提示条由 Chrome/Edge 管理。Popup 关闭不代表停止，使用「停止采集」或浏览器「取消调试」。再次启动浏览器不自动 attach。V0.1 已由用户实机验证；V0.2 自动化状态：NOT VERIFIED ON REAL DOUYIN PAGE。
+
+## V0.2 增补（保持 V0.1 权限与本地原则）
+
+V0.1 用户实机确认安装、采集和 ZIP PASS；V0.2 真实页面自动操作尚未验证。
+
+用户主动点击「自动采集当前直播」后，额外通过 CDP Runtime.evaluate 执行扩展打包的有限 DOM 控件操作，通过 Page.reload 正常刷新同一页一次；不执行用户传入脚本、不读 document.cookie、localStorage 认证项、页面全局登录对象或请求 headers。调试命令白名单新增这两项，仍无 Network 请求构造/重放。
+
+仅使用 DOM 精确选择器、可见文字、既有 UI 点击、专属文字面板分页/滚动/时间滑块。不点历史直播条目、不批量翻历史、不自动登录。当前场 query 标识仅短暂用于内存中的场次变化守卫，既不加入 report，也不写本地缓存。报告记录随机 run_id、模块步骤、时间与统计，可区分本次采集证据。
+
+默认仍不保存 query value。配置仅允许人工审核的 data_type / metric_name / roomStatsContentType 精确枚举，未知值、重复 query、身份/认证字段强制忽略。配置初始 {}，不推断 room_id、uid、session 等为安全字段。
+
+字符串 JSON 在正文落盘前最多解析3层并递归清除认证字段；超层 JSON 字符串替换为 [NESTED_JSON_LIMIT]。评论昵称等仍属于诊断业务正文，V0.2 无正式数据库、不新增身份存储系统，也不承诺匿名化全部业务正文。历史摘要只含明确时间与有限数值指标，不含历史身份参数。
+
+停止取消后续动作并发起 detach；已经发出的同步页面动作不能撤销。自由文本脱敏边界仍存在，分享 ZIP 前须人工复核。无外部服务器、上传、AI、定时后台抓取或 Chrome sync。

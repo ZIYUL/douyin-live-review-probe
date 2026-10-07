@@ -1,70 +1,70 @@
-# V0.1 验证结果
+# V0.2 验证结果
 
-DOUYIN_LIVE_REVIEW_PROBE_V0_1 = **PARTIAL**
+**DOUYIN_LIVE_REVIEW_PROBE_V0_2 = PARTIAL**
 
-执行日期：2026-10-07。环境：Linux / Node.js v24.19.0 / Chromium 151.0.7922.173。未访问真实抖音账号或接口。
+执行日期：2026-10-07；开发环境 Linux / Node.js v24.19.0 / Chromium 151.0.7922.173。
 
-## IMPLEMENTATION
+## 基线与范围
 
-已创建可直接加载的 Manifest V3 源码目录、模块化后台、Popup、响应分类、递归脱敏、Schema、时间候选、文本时间轴、按 host/path/method 分组、内容 hash 版本管理、IndexedDB、ZIP 导出、Mock 和中文安装/隐私说明。
+V0.1：用户提供的 Mac Chrome 真实登录主播中心验证为 PASS（安装、attach、响应/正文、JSON、ZIP、当前性能），见 V0_1_REAL_BASELINE.md。本次开发保留既有采集链路，没有在开发环境访问账号或主动调用抖音业务 API。
 
-仅 debugger + activeTab 两项权限。无构建步骤、第三方运行依赖或服务器。源代码在 extension/；测试与文档在 tests/、mocks/、docs/。
+V0.2：实现独立 Auto Collector、DOM 页面控制/选择器、状态机、正常当前页刷新、网络/路由/DOM 等待、内容子模块切换、文字专属控件加载、保守覆盖率、评论候选、嵌套 JSON、安全 Query 精确枚举、历史摘要、本次 run 证据与 UI/ZIP 报告。手动模式、原权限、缓存、分组、版本、脱敏与大小限制保留。
 
 ## TESTS
 
-`npm test`：**24 PASS，0 FAIL**。
+`npm test`：**43 PASS / 0 FAIL**。
 
-- 核心 18 项：JSON / text / base64 / binary，URL query/value/userinfo 去除，递归敏感字段和文本过滤，数组与非首条字段并集，60 秒规律，content + contentTime 和 20 秒规律，不依赖时间字段名，无序与非时间数值排除，静态/图片/媒体/埋点/范围外过滤，可配置规则，5 / 20 MiB 边界，分组/重复去重/不同内容版本，100 MiB 容量，capture → inventory → ZIP，权限白名单。
-- 后台 Mock 6 项：开始与 loadingFinished 取正文、本地保存与跳过媒体；正文不可读保留元数据；立即停止与停止后忽略事件；错误域名拒绝与清空；顶层页面导航自动 detach；attach 过程中停止取消开始。
-- Python `zipfile -t work/mock-diagnostic.zip`：完整性 PASS。
-- 所有扩展 JS `node --check`：语法 PASS。
+- 核心18项：原V0.1全部通过。
+- 后台7项：原V0.1的6项全部通过；新增自动启动、异步状态保存、停止及无队列死锁测试。
+- V0.2新增18项：状态机与模块顺序、终态/非法跃迁、用户停止、非复盘页拒绝、缺失模块仍完成、timeout继续、network quiet/最短等待/正文处理、endpoint/route/abort等待、缺Selector不点击、文字无进展上限、带缺口覆盖率、nested JSON和3层限制、嵌套认证删除、safe query默认与强制拒绝、评论候选、历史摘要、跨Response合并/run隔离/导出、无主动API调用、批量接口拒绝。
 
-上述结论为 **MOCK VERIFIED**。后台测试使用 chrome API / IndexedDB 的测试替身，不是实际浏览器 chrome.debugger 集成验证。完整测试输出附在本目录。
+完整输出保存在 AUTOMATED_TEST_OUTPUT.txt。
 
-浏览器测试 `npm run test:browser`：**BLOCKED / NOT VERIFIED**。使用 Chromium 本地 HTTPS 模拟页面及回环地址映射尝试加载扩展，浏览器返回：
+`npm run test:automation-browser`：**PASS / BROWSER DOM MOCK VERIFIED**。
 
-```text
-Loading of unpacked extensions is disabled by the administrator.
-```
+使用真实 Chromium DOM、本地HTTPS、模拟域名到127.0.0.1的映射，运行生产 PageController / ReviewNavigator / AutoCollector、分类/Schema/脱敏/分组/导出模块。测试页面的正常前端事件加载本地虚构Response，捕获数据通过CDP读取；没有访问真实抖音网络。
 
-命令行加载也未生成扩展后台目标。未修改管理员策略，未尝试真实抖音页面。此结论表示环境阻碍验证，不证明扩展能安装，也不证明源码安装失败。
+验证：
+
+- 当前页正常刷新及导航等待，真实DOM按钮点击、模块顺序与稳定等待。
+- 文字分页从非起点回退，再正常向后加载多个窗口。
+- 虚构110分钟样本331条、覆盖率100%，核心趋势与正文候选、评论候选、本场摘要。
+- query认证/身份sentinel未出现在本地会话/ZIP；页面取消标记拒绝后续点击。
+- 实际生成ZIP并通过Python zipfile完整性检查。
+
+浏览器Mock场景结果保存在 V02_BROWSER_MOCK_RESULT.json 与 V02_BROWSER_MOCK_OUTPUT.txt。此脚本直接驱动页面CDP，**未安装扩展**；因此不是Popup → chrome.debugger → 自动化的真实扩展端到端验证。
+
+所有扩展与测试JS node --check PASS；git diff --check PASS。旧 `test:browser` 是V0.1安装测试脚本，在本环境此前被管理员未打包扩展策略阻止；不把该项说成PASS，也不否定用户在Mac上的V0.1实机PASS。
 
 ## SECURITY_CHECK
 
-源码检查和 Mock 导出检查 **PASS / MOCK VERIFIED**：
+`npm run test:security`：**PASS**，完整输出见 SECURITY_CHECK_OUTPUT.txt。
 
-- 14 个扩展文件无 fetch / XMLHttpRequest / WebSocket / sendBeacon、主动接口加载、重放命令、远程脚本或私钥。
-- 权限与模块引用检查 PASS。
-- Mock 注入的认证 sentinel 和 query value 没有出现在本地会话 / 导出内容。
-- headers / postData / 原始 URL 不写入本地会话；两条核心响应保持业务字段及时间结构。
-- 交付文件不含真实账号数据、登录凭证、Mock 开发私钥或浏览器 profile。测试中出现的 FAKE / MOCK / NEVER_PERSIST 是虚构安全样本。
+- Manifest保持 debugger + activeTab，无新增权限或远程脚本。
+- 扩展源码不含 fetch / XMLHttpRequest / WebSocket / sendBeacon、Network.loadNetworkResource / replayXHR / Fetch.continueRequest 等主动业务API调用。
+- CDP白名单新增的Runtime.evaluate仅运行打包DOM函数，Page.reload仅当前页正常刷新；Network.getResponseBody保持被动读已有正文。
+- 嵌套JSON认证字段在保存前删除；Query默认无value，枚举只留人工配置精确值，身份/认证键不能启用。
+- 调用上下文只含随机run_id和步骤；当前场身份守卫仅瞬时存在页内/内存，不持久化。
+- ZIP检查没有Mock身份query/认证sentinel、临时私钥、浏览器profile或真实账号凭证。昵称等业务数据仍可能有个人信息，不承诺任意自由文本零泄漏。
 
-仅源码与已知样本验证，不能保证任意真实自由文本中的未标注凭证一定可识别。README 的隐私说明包含 Cookie / Authorization / Token 等字样，不代表保存了对应字段或值。
+## MOCK_AUTOMATION
 
-## REAL_PAGE_VERIFICATION
+**PASS**：43项自动测试 + 本地真实Chromium DOM自动化Mock。原24项回归持续PASS。
 
-**NOT VERIFIED ON REAL DOUYIN PAGE**
+## REAL_PAGE_AUTOMATION
 
-| 用户 PASS 门槛 | 当前证据 |
-| --- | --- |
-| 1 Chrome / Edge 安装 | NOT VERIFIED；本环境管理员策略阻止安装 |
-| 2 实际 attach | MOCK VERIFIED；浏览器 / 抖音未验证 |
-| 3 页面无明显性能影响 | NOT VERIFIED |
-| 4 minute_trend 真实正文 | Mock 模拟已读；真实页面未验证 |
-| 5 data.series / 字段 / 分钟规律 | MOCK VERIFIED |
-| 6 room_stats_content_list 真实正文 | Mock 模拟已读；真实页面未验证 |
-| 7 content + contentTime 候选 | MOCK VERIFIED |
-| 8 未知业务 JSON | MOCK VERIFIED |
-| 9 api_inventory.json | MOCK VERIFIED |
-| 10 ZIP 导出 | ZIP 生成 / 解压 PASS；实际 Popup 下载未验证 |
-| 11 ZIP 不含认证数据 | 已知敏感样本 PASS；真实正文未验证 |
-| 12 无真实账号凭证 | 本交付源码与 Mock 检查 PASS，没有输入真实凭证 |
-| 13 自动测试 | 24 PASS，0 FAIL；浏览器集成 BLOCKED |
+**NOT VERIFIED ON REAL DOUYIN PAGE**。本次没有用户登录环境或实际DOM快照，不能宣称一键自动切换、真实全场文字≥95%或真实评论正文已完成。
 
 ## KNOWN_LIMITATIONS
 
-详见 README：Worker / OOPIF 子目标未递归 attach、CDP 缓冲与正文获取失败、100 MiB 正文上限及队列 cap、自由文本规则脱敏边界、JSON 分析截断和时间候选漏报、真实页面性能未测。大正文可能只能保留 metadata，浏览器未提供 body 时不能生成 schema。只接收开始后自然产生的响应。
+1. 实际DOM选择器未实机确认，控件重复/缺失/非原生slider/可信事件要求可能SKIPPED或TIMEOUT；不做坐标兜底或接口重放。
+2. 文字仅专属面板内明确控件；不自动播放/任意拖动录像。最多20次回退、120次前进、3次无新点停止；目标95%，不保证平台全部窗口可访问。
+3. 缺真实直播边界时coverage=null/UNKNOWN。覆盖按≤60秒相邻点计入，静默时段可保守低估；首尾跨度不能冒充完整。文字按时间点去重，record_count是唯一有效时间点数。
+4. 评论结构候选可能与主播话术相似；报告评论数量仅采用comments步骤的响应证据。缺控件NOT AVAILABLE，有控件无正文NOT OBSERVED，后者不能证明平台没有历史评论。
+5. 完整页面导航会重建取消标记；非预期reload、不同场次/页面或debugger断开可安全中断。已派发同步点击不能撤销。
+6. V0.1的Worker/OOPIF覆盖、CDP正文缓冲、100MiB容量、8个正文队列、分析/元数据截断、自由文本脱敏边界保留。正文保存失败/超限使自动结果PARTIAL。大量数据的真实页面性能仍需验收。
+7. 不自动遍历历史、多账号、登录、定时、AI、云端或正式数据库。
 
 ## NEXT_STEP
 
-在允许未打包扩展的 Chrome / Edge 上按 [真实页面验收清单](REAL_PAGE_CHECKLIST.md) 验收；观察真实业务域名、两条核心响应与页面性能。完成全部门槛后再将结果升级为 PASS，不扩大到 AI 复盘。
+在已验证的Mac Chrome账号环境按REAL_PAGE_CHECKLIST.md运行V0.2，检查自动模块加载、核心响应、真实文字边界与覆盖、评论正文、停止和页面性能。只有真实自动化验收完成后才可升级整体PASS。本次只推送work，不merge main。

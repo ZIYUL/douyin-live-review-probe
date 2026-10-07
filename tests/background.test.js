@@ -15,3 +15,18 @@ test('错误域名拒绝，清空本地缓存',async()=>{assert(!(await message(
 test('顶层页面导航范围外自动 detach',async()=>{failBody=false;assert((await message({type:'start',tabId:1})).ok);event('Page.frameNavigated',{frame:{url:'https://other.example/'}});const r=await message({type:'status'});assert.equal(r.tabId,null);assert.equal(detached,2);});
 
 test('开始 attach 尚未完成时停止，不能重新进入采集',async()=>{let finish,entered;const gate=new Promise(r=>entered=r);chrome.debugger.attach=async()=>{entered();await new Promise(r=>finish=r);};const starting=message({type:'start',tabId:1});await gate;await message({type:'stop'});finish();assert.equal((await starting).ok,false);assert.equal((await message({type:'status'})).tabId,null);});
+
+test('V0.2 后台自动启动、异步状态更新和停止，无队列死锁',async()=>{
+ chrome.debugger.attach=async()=>{};
+ chrome.debugger.sendCommand=async(target,method,params)=>{
+ if(method!=='Runtime.evaluate')return {};
+ const action=params.expression.match(/\)\("(inspect|init|find|cancel|signature|click|textReset|textAdvance)"/)?.[1];
+ const values={inspect:{status:'OK',live_key:'EPHEMERAL_ONLY',live_start:'2026-09-01 10:00:00',live_end:'2026-09-01 11:50:00'},init:{status:'OK'},find:{status:'FOUND'},cancel:{status:'CANCELLED'},signature:{status:'OK',signature:'stable'},click:{status:'CLICKED'}};
+ return {result:{value:values[action]||{status:'AT_END'}}};
+ };
+ assert.equal((await message({type:'autoStart',tabId:1})).ok,true);
+ const state=await message({type:'status'});assert(state.autoRunning);assert(state.session.auto.run_id);
+ const stopped=await message({type:'stop'});assert.equal(stopped.tabId,null);
+ let final;for(let i=0;i<50;i++){final=await message({type:'status'});if(!final.autoRunning)break;await new Promise(r=>setTimeout(r,10));}
+ assert.equal(final.autoRunning,false);assert.equal(final.session.auto.state,'STOPPED');assert(!JSON.stringify(stored).includes('EPHEMERAL_ONLY'));
+});

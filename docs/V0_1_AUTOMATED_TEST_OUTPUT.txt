@@ -1,0 +1,44 @@
+
+> douyin-live-review-probe@0.1.0 test
+> node tests/core.test.js && node tests/background.test.js
+
+✔ JSON 与文本判断 / base64 / binary (1.213776ms)
+✔ URL 去 query value / credentials / fragment (1.334498ms)
+✔ 敏感字段递归过滤 / 文本 / 嵌入 URL (0.433652ms)
+✔ 字段并集 / 数组检测 / 分钟间隔 (8.957527ms)
+✔ content + contentTime 文本时间轴 / 20 秒 (0.454133ms)
+✔ 不依赖时间字段名称 / 无序拒绝 / 数值指标拒绝 (0.264308ms)
+✔ 分类 STATIC (0.331409ms)
+✔ 分类 IMAGE (0.080621ms)
+✔ 分类 VIDEO_AUDIO (1.008808ms)
+✔ 分类 TELEMETRY (0.230717ms)
+✔ 分类 OUT_OF_SCOPE (0.195895ms)
+✔ 分类 BUSINESS_CANDIDATE (0.13937ms)
+✔ 可配置埋点 (0.083004ms)
+✔ 大小限制精确边界 (0.077537ms)
+✔ Endpoint grouping / 内容不同不会覆盖 / 重复去重 (5.413845ms)
+✔ 会话容量上限保留 metadata (0.535656ms)
+✔ capture → inventory → ZIP 脱敏整链 (4.615594ms)
+✔ 权限最小 / 无外部脚本 / 命令白名单 (0.174843ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31.500521
+✔ 后台开始 / 加载结束取正文 / 跳过图片 / 本地持久化 (13.63286ms)
+✔ 正文不可读保留 metadata，不持久化错误原文 (0.67815ms)
+✔ 停止立即 detach，停止后事件无效 (0.423256ms)
+✔ 错误域名拒绝，清空本地缓存 (0.319651ms)
+✔ 顶层页面导航范围外自动 detach (0.394073ms)
+✔ 开始 attach 尚未完成时停止，不能重新进入采集 (0.406942ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21.573957

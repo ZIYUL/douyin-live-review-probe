@@ -1,3 +1,4 @@
+import {observeBusiness} from '../automation/session-analysis.js';
 import {sanitizeURL,sanitize} from '../lib/sanitizer.js';
 import {classify,parseBody,sizePolicy} from '../lib/response-classifier.js';
 import {analyze} from '../lib/schema-analyzer.js';
@@ -10,6 +11,7 @@ export async function capture(s,m,result){
  const clean=sanitize(parsed.value);const body=typeof clean==='string'?clean:JSON.stringify(clean);const size=parsed.byte_length;
  m.response_size=size;m.body_status=sizePolicy(size,s.allowLarge);
  const schema=parsed.kind==='BUSINESS_JSON'?analyze(clean):undefined;
+ if(schema)observeBusiness(s,m,clean,schema);
  await groupCapture(s,m,['SAVE','SAVE_LARGE'].includes(m.body_status)?body:undefined,schema);
 }
-export function metadata(params,method,rules){const r=params.response;const u=sanitizeURL(r.url);const m={...u,method,mime:r.mimeType,type:params.type,status:r.status,captured_at:new Date().toISOString(),response_size:r.encodedDataLength||0};m.classification=classify(m,rules);return m;}
+export function metadata(params,method,rules,allowlist={}){const r=params.response;const u=sanitizeURL(r.url,allowlist);const m={...u,method,mime:r.mimeType,type:params.type,status:r.status,captured_at:new Date().toISOString(),response_size:r.encodedDataLength||0};m.classification=classify(m,rules);return m;}

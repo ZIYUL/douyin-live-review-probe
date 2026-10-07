@@ -1,0 +1,21 @@
+{
+  "data": {
+    "rows": [
+      {
+        "comment": "怎么操作",
+        "createTime": "2026-09-01 10:49:31",
+        "nickname": "虚构用户1"
+      },
+      {
+        "comment": "1",
+        "createTime": "2026-09-01 10:49:35",
+        "nickname": "虚构用户2"
+      },
+      {
+        "comment": "谢谢",
+        "createTime": "2026-09-01 10:49:39",
+        "nickname": "虚构用户3"
+      }
+    ]
+  }
+}

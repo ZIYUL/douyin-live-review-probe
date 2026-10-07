@@ -1,96 +1,97 @@
-# Douyin Live Review Probe V0.1
+# Douyin Live Review Probe V0.2
 
-抖音主播中心直播复盘数据探针。诊断型工具：仅监听用户选择的标签页已经正常收到的 Response，分析结构并导出本地 ZIP。无主动抖音 API 请求、请求重放、账号管理、AI 分析或上传。
+抖音主播中心直播复盘数据探针。保留 V0.1 的 Manifest V3 / chrome.debugger / Network.responseReceived / Network.getResponseBody、本地诊断缓存、手动模式和 ZIP 导出，新增「自动采集当前直播」。无 AI、主动业务 API 请求、重放、自动登录、批量历史采集或云上传。
 
-当前交付状态：**DOUYIN_LIVE_REVIEW_PROBE_V0_1 = PARTIAL**。24 项自动测试 PASS / MOCK VERIFIED；此环境的 Chromium 管理员策略禁止安装未打包扩展，安装与真实 chrome.debugger 链路未能完成实机验证。抖音真实页面：**NOT VERIFIED ON REAL DOUYIN PAGE**。详见 [测试报告](docs/TEST_RESULTS.md)。
+**当前 V0.2：PARTIAL。** 自动测试与真实 Chromium DOM 的本地 Mock 自动操作已验证；真实抖音 V0.2 自动化：**NOT VERIFIED ON REAL DOUYIN PAGE**。
 
-## 安装（Mac / Windows，Chrome / Edge）
+V0.1 已由用户在 Mac Chrome、正常登录主播中心的真实复盘页验证安装 / attach / 正文读取 / JSON / ZIP / 当前性能 PASS。用户报告约 463 Network Response、55 JSON、33 Endpoint Group；不会推翻该基线。详见 [实机基线](docs/V0_1_REAL_BASELINE.md)，该结论不等于 V0.2 自动化验收。
 
-1. 解压源码交付包；找到其中的 `extension` 目录，无需 npm 安装或构建。
-2. Mac Chrome：Chrome → 扩展程序 → 管理扩展程序（或打开 `chrome://extensions`）。
-3. 开启「开发者模式」。
-4. 点击「加载已解压的扩展程序」，选择 `extension` 目录，不是源码包根目录。
-5. 将扩展固定到工具栏。Windows Chrome 操作相同。
-6. Edge 打开 `edge://extensions`，开发人员模式 → 加载解压缩的扩展 → 选择 `extension`。
+## 安装与升级
 
-要求 Chromium 内核版本 ≥118。Safari 不支持。本版本不发布 Chrome Web Store。如果浏览器组织策略禁止未打包扩展，需要在允许开发者扩展的浏览器环境安装。
+1. 解压 `Douyin_Live_Review_Probe_V0.2_Extension.zip`，找到 `extension` 目录，无需 npm 安装或构建。
+2. Mac / Windows Chrome：Chrome → 扩展程序 → 管理扩展程序（`chrome://extensions`）→ 开发者模式 → 加载已解压的扩展程序 → 选择 `extension`。
+3. Edge：`edge://extensions` → 开发人员模式 → 加载解压缩的扩展 → 选择 `extension`。
+4. Chrome/Edge 内核 ≥118，Safari 不支持。固定扩展到工具栏。
+5. 更新已有未打包扩展时可先备份 V0.1，把新 extension 文件放入原加载目录，再点击扩展页的「重新加载」。保持加载路径可保留同一个扩展 ID / 本地会话缓存；重新加载会停止在途采集。
 
-## 使用
+旧 V0.1 源码保留在 Git 历史，旧安装包仍在 artifacts/。没有新增权限。
 
-1. 自行正常登录 `https://anchor.douyin.com`，打开自己有权限的直播复盘。
-2. 点击扩展工具栏图标 →「开始采集当前标签页」。浏览器会显示调试权限提示条。
-3. 手动刷新页面，或切换正常复盘面板、指标、文字记录。开始前收到的正文无法补采；扩展不替你刷新、点击或翻历史。
-4. 查看统计和接口列表，展开接口查看 Host / Path / Method、调用次数、MIME、每次响应状态、结构、数组字段、时间序列、文本时间轴及每个版本的 前 4096 字符预览。
-5. 点击「停止采集」立即发起 detach。采集时关闭 Popup 不会停止；浏览器调试提示条、打开 DevTools、关闭标签页或离开主播中心可能导致 detach。
-6. 点击「导出诊断包 ZIP」，下载到浏览器默认下载位置。建议先停止，得到稳定快照；未停止时导出仅覆盖当时已处理完成的 Response。
-7. 「清空本次采集」停止并删除扩展内当前缓存；不会删除已导出的文件。跨多个直播复盘采集前建议先清空，避免不同场次混合。
+## 自动采集当前场
 
-默认业务正文范围只包含 `anchor.douyin.com`。若当前页面确实使用其他必要业务域名，停止后在设置中逐行加入精确域名；不支持通配符。埋点忽略列表可编辑，优先于业务允许列表。不要添加与复盘无关的域名。
+1. 自行正常登录并进入**当前一场直播复盘**。
+2. 点击扩展「自动采集当前直播」。不能与手动采集同时运行。
+3. 扩展 attach，确认可见复盘模块，正常刷新当前页一次。请不要在采集中自行切换到另一场直播。
+4. 按 DOM 精确控件依次点击：整体数据 → 内容分析 → 营收 → 流量 → 互动指标 → 粉丝 → 文字记录 → 评论 → 礼物 → 关键片段 → 观众分析 → 流量分析。
+5. 缺失或歧义控件记录 `SKIPPED_NOT_AVAILABLE`，不猜坐标、不构造跳转 URL、不无限重试。每步使用最短等待、业务网络 quiet 和 DOM 稳定判断；超时记录并继续，错误页面 / 当前场变化则停止。
+6. 文字记录仅操作**专属文字面板**内的前后分页、滚动或明确标识的时间范围 input。尝试回退到起点再向后加载；未识别到控件时如实报告 PARTIAL。
+7. 完成后自动 detach，显示 `CURRENT_LIVE_CAPTURE_COMPLETE` 和 `AUTO_CAPTURE_RESULT` 的 PASS / PARTIAL / FAIL。点击「停止自动采集」立即取消后续动作并发起 detach；已发出的同步点击不能撤销。
+8. 导出 ZIP，含 `auto_capture_result.json`。当前场 report 只统计本次 run 的捕获证据，旧会话响应不会被当成本场成功。库存仍保留本地当前会话的全部手动/自动响应，metadata.context 可区分 run 和步骤。
 
-## 保存和导出
+自动操作使用合成 DOM click/input/change。真实页面可能要求可信事件，或 DOM 与当前通用选择器不同；本版本不绕过这些限制。选择器集中在 `extension/src/automation/selectors.js`，当前无真实 DOM 快照，不宣称已匹配所有实际页面控件。
 
-- IndexedDB 存储当前会话，浏览器重启后可查看、导出；采集必须再次主动开始，不自动 attach。
-- Endpoint 按 `host + path + method` 分组，不保留 URL query 值、fragment、URL 用户名或密码。
-- 可保留不敏感 query key 名；认证参数名称也被过滤。
-- 正文先解析 / 脱敏，再计算 SHA-256 和本地保存；相同内容只留一份和重复次数，不同内容保留独立版本。每组保留最近 1000 次调用元数据及删除计数。
-- 每个结构版本保留 Schema Summary。结构扫描包含数组字段并集，类型扫描最多 200000 节点、40 层，截断标记 `analysis_truncated`。库存的快速摘要对应最后一次分析，完整结构版本位于 schemas 文件。
-- ≤5 MiB 正常保存；5–20 MiB 默认只保留 metadata + schema，并标 `LARGE_RESPONSE`，可在停止后勾选允许保存；>20 MiB 只留 metadata + schema（前提 CDP 能返回正文）。限制按解码后正文 UTF-8 字节计算。
-- 会话正文最大 100 MiB；最多 2000 个 endpoint；正文待处理队列最多 8 个；超限保留可用元数据并标记。缓存空间不足或浏览器无法提供正文，会显示失败标记或通用错误，绝不重放请求。
-- 图片、媒体、静态、埋点和范围外响应只计数，永不调用 getResponseBody。
-- 标准 JSON MIME / plain text 优先处理；XHR / Fetch 即使 MIME 不标准也尝试 JSON。二进制或非 UTF-8 base64 不保存正文。
-- 无时区 `YYYY-MM-DD HH:mm:ss` 按中国标准时间解释；支持 epoch 秒 / 毫秒。至少 3 个有效点、有效比例≥80%、单调非递减且有正间隔才标候选；不根据接口名解释业务意义。
+## 文字覆盖与评论
 
-ZIP（无压缩 STORE，可由系统解压）：
+`text_coverage` 输出 live_start/end、text_start/end、record_count、coverage_seconds、coverage_ratio、boundary_span_ratio、gap_count 和 status。
 
-```text
-DouyinProbe_YYYYMMDD_HHMMSS/
-  README.txt
-  session.json
-  api_inventory.json
-  responses/<endpoint>_<编号>[_v版本].json 或 .txt
-  schemas/<endpoint>_<编号>.schema.json
+- 主播文字记录 `room_stats_content_list` 是用户已确认的结构，跨响应合并并按时间点去重，不重放时间窗口请求。
+- 直播边界优先取页面明确标识的开播/下播时间，可用当前 `room_base_v2` / `get_room_info` 响应中明确 start/end 对补充；不使用历史列表或文字窗口的边界冒充整场边界。
+- 无法确定整场起止时 `coverage_ratio=null`、status=UNKNOWN，不按 100% 报告。
+- 相邻文字时间间隔≤60 秒才计入覆盖；更大的间隔视为未知缺口。只抓到首尾不能伪装为全场覆盖。`boundary_span_ratio` 仅描述跨度，不作为完整性 PASS。
+- ≥95% 可标文字覆盖 PASS，低于门槛 PARTIAL。无声时段也可能导致保守低估，不把指标解释为平台内容丢失。
+- 每次文字最多 120 个前进动作、20 个回退动作、连续 3 次无新时间点停止、文字阶段最长约 4 分钟（含每个有界等待可能额外延迟）；不自动播放直播录像或无限拖动。
+
+评论依据数组正文结构识别：content/text/comment/message + time/timestamp/contentTime/createTime + 用户字段。输出 `COMMENT_TIMELINE_CANDIDATE`、字段和记录数量，支持非单调 / 两条记录。候选不是最终语义证明，主播话术若有相同结构也可能成为候选；自动结果只把评论步骤实际收到的候选作为评论观察证据。
+
+不存在评论控件时显示 NOT AVAILABLE；存在控件但没有收到正文显示 NOT OBSERVED，不能证明平台不存在历史评论。无评论实证时整体结果保守为 PARTIAL。
+
+## 二次 JSON、历史摘要、安全 Query
+
+- 字符串符合对象/数组 JSON 并 parse 成功时，最多二次解析 3 层，输出 nested_json_detected / nested_json_paths，并分析二次结构。扫描受节点、深度与解析预算限制。
+- 保存前先过滤嵌套 JSON 中认证字段；超出解析层数的 JSON 字符串用 `[NESTED_JSON_LIMIT]` 替代，避免保留未审查的深层认证信息。
+- `history_list` 仅解析 `HistoryLiveSummary`：明确的起止时间、duration_seconds 和有限数字指标；不点击历史直播、不批量采集。提供 `collectLive('current')` 和显式拒绝执行的 `collectRecentLives` 接口，V0.3 实现未启用。
+- 默认仍删除全部 query value。只有内置许可字段 data_type / metric_name / roomStatsContentType **及用户明确填写的精确枚举值**才可保留。设置初始 `{}`。
+
+人工审核后可填写：
+
+```json
+{"metric_name":["pcuTotal"],"data_type":["revenue","traffic"]}
 ```
 
-编号避免跨域、不同方法和路径同名冲突。内容版本元数据包含对应文件、大小、hash、次数和最后时间。Schema 键为内部结构 hash；不包含认证信息。导出目录时间使用 UTC，详情中的时间为 ISO UTC。
+未知值、重复参数和任何 room_id / anchor_id / uid / token / signature / session / device_id 等字段始终不保留 query value。上述示例是格式示范，不声称对应真实页面枚举。
 
-## 权限（全部）
+## 手动模式、缓存与导出
 
-| 权限 | 原因 |
-| --- | --- |
-| `debugger` | 主动 attach 用户选择的单个标签页，使用 CDP `Page.enable`（导航范围检测） / `Network.enable` / `Network.getResponseBody` 读取该页已接收正文。Chrome 的权限提示范围较宽，代码执行范围限制为选中的主播中心标签页。 |
-| `activeTab` | 用户点击扩展时获取当前标签页 URL / ID，校验主播中心地址。 |
+手动开始/停止、接口详情、Endpoint Grouping、Schema、时间候选、文字时间轴、版本正文预览（4096 字符）、本地缓存与 ZIP 导出全部保留。只保存用户允许域名的业务正文，默认 anchor.douyin.com；埋点列表优先于业务列表。
 
-无 `<all_urls>`、无 `host_permissions`、无 `tabs` 权限、无 `storage` / `downloads` 权限。CDP debugger 不需要 host permission；IndexedDB 不需要 storage permission；ZIP 用 Popup 的 Blob + 下载链接，不需要 downloads permission。不注入 content script，不 hook fetch/XHR。
+- host+path+method 分组；不保存 URL query 原始值、fragment、URL 用户名/密码、headers 或 postData。
+- 同内容 SHA-256 去重，不同内容独立版本，每组最近 1000 次 metadata；各 Schema 版本及按本次 run 的 schema 可查。
+- ≤5 MiB 正文正常保存；5–20 MiB 默认 metadata/schema，可停止后允许保存；>20 MiB 不保存正文，CDP 提供正文时分析 schema。总正文上限 100 MiB，2000 endpoints，8 个在途正文。
+- 图片/媒体/静态/埋点/范围外响应不取正文。JSON 扫描最多 200000 节点/40 层，截断明确标记。
+- 缓存使用已有 V0.1 IndexedDB，不新增正式数据库，不自动恢复采集。浏览器重启中断的自动任务标 PARTIAL。清空停止且删除插件当前缓存，已导出 ZIP 自行删除。
+- ZIP 为系统可解压的 STORE 格式，不支持 ZIP64。新增 auto_capture_result.json、history_live_summaries.json；其余 session、api_inventory、responses、schemas 保持。
 
-隐私规则与边界见 [PRIVACY.md](PRIVACY.md)。
+## 权限与安全
 
-## 开发与测试
+Manifest 仍仅 `debugger` / `activeTab`：前者读取指定 tab 响应并做有限 DOM 操作/当前页正常刷新，后者读取用户选择的标签页 URL/ID。无 all_urls、host_permissions、tabs、scripting、storage 或 downloads 权限。不注入常驻 content script，不 hook fetch/XHR。
 
-Node.js 20+，无第三方依赖。
+CDP 命令白名单：Network.enable、Network.getResponseBody、Page.enable、Runtime.evaluate（仅打包的 DOM 操作函数）、Page.reload（当前页正常刷新）。没有业务 API 构造、重放、认证访问或上传。详见 [PRIVACY.md](PRIVACY.md)。
+
+## 测试与结构
+
+Node.js 20+，零第三方运行依赖：
 
 ```sh
 npm test
+npm run test:security
+npm run test:automation-browser
 ```
 
-24 项核心 / 后台 Mock 自动测试。`mocks/` 只有虚构数字与话术；不依赖抖音账号。测试输出示例 ZIP 位于 `work/mock-diagnostic.zip`（仅开发产物）。
+最后一项需要 Linux /usr/bin/chromium、openssl 和允许本地端口的环境；脚本自动生成/删除临时 Mock 证书，模拟域名只映射到 127.0.0.1。它直接测试真实 Chromium DOM 与本地正常前端响应，不安装扩展，不等于真实 chrome.debugger 扩展自动化验收。
 
-浏览器 Mock 测试（仅开发测试程序使用 fetch 请求本地模拟页面；扩展无 fetch）：
+- background/：保持 V0.1 网络响应链路。
+- automation/：状态机、页面控制、选择器、导航、等待及本场证据分析。
+- lib/：脱敏、Query 策略、Schema、嵌套 JSON、时间/评论候选、覆盖率、分组和导出。
+- popup/、storage/：界面及现有缓存。
+- mocks/、tests/、docs/：虚构样本、自动测试、验证与验收文档。
 
-```sh
-mkdir -p work
-openssl req -x509 -newkey rsa:2048 -nodes -keyout work/mock.key -out work/mock.crt -days 1 -subj /CN=anchor.douyin.com
-npm run test:browser
-```
-
-需要 Linux `/usr/bin/chromium`、允许本地端口与未打包扩展的环境。测试把模拟域名映射到 127.0.0.1:9443，仅本地 HTTPS；开发证书及浏览器 profile 不在交付包中。本次浏览器测试被管理员策略阻止，不能将其称为 PASS。
-
-## 已知限制与下一步
-
-- 未完成真实 Chrome / Edge、Mac / Windows 的安装验收和抖音页面验收。
-- 只启用该 tab 的 CDP Network，可能覆盖 Service Worker 返回给页面的响应；没有递归 attach 独立 Worker / OOPIF 子目标，不能保证捕获全部子目标网络。
-- DevTools 和其他 debugger 客户端可能中断采集；关闭浏览器、缓存回收、超大正文、响应过快可能导致正文不可读。CDP 缓冲为单响应 25 MiB / 总量 80 MiB，>缓冲的正文不能分析 schema。
-- 不支持 ZIP64；会话 cap 控制导出规模。大量数据 JSON.parse、哈希、IndexedDB 会消耗内存 / CPU；未做真实页面性能测试。
-- 文本与时间检测是候选描述；2 点、倒序、无序、非常规日期格式或分页跨块数据可能漏报，未合并跨响应时间轴。
-- 规则脱敏无法证明任意自由文本中不存在未标注的凭证，不能把 Mock 的安全结论当作真实数据零泄露证明。
-
-下一步先完成 [真实验收清单](docs/REAL_PAGE_CHECKLIST.md)，核实 minute_trend / room_stats_content_list 正文和页面性能；再基于观察结果完善必要业务域名和子目标覆盖。AI 复盘仍不在 V0.1 范围。
+[测试报告](docs/TEST_RESULTS.md)区分用户报告的 V0.1 实机基线、本地 Mock 和未验证的 V0.2 真实页面操作。下一步仅按[实机验收清单](docs/REAL_PAGE_CHECKLIST.md)验证 V0.2，不开发批量历史采集或 AI。

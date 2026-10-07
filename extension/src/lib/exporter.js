@@ -16,7 +16,8 @@ export function exportFiles(raw){
  const name=(e.name.replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,80)||'endpoint')+'_'+String(i+1).padStart(3,'0');
  const versions=e.versions.map((v,j)=>{const path='responses/'+name+(j?'_v'+(j+1):'')+(v.response_type==='json'?'.json':'.txt');put(path,v.body);return {...v,body:undefined,file:path};});
  put('schemas/'+name+'.schema.json',e.schemas);
- const arrays=e.schema?.arrays||[];return {...e,versions,top_level_keys:e.schema?.top_level_keys||[],arrays,time_series:arrays.find(a=>a.time_series.detected)?.time_series||{detected:false},text_timeline:arrays.find(a=>a.text_timeline)?.text_timeline||false};
+ const arrays=e.schema?.arrays||[];return {...e,versions,top_level_keys:e.schema?.top_level_keys||[],arrays,time_series:arrays.find(a=>a.time_series.detected)?.time_series||{detected:false},text_timeline:arrays.find(a=>a.text_timeline)?.text_timeline||false,comment_timeline:arrays.find(a=>a.comment_timeline)?.comment_timeline||false,nested_json_detected:e.schema?.nested_json_detected||false,nested_json_paths:e.schema?.nested_json_paths||[]};
  });
+ if(s.auto)put('auto_capture_result.json',s.auto);if(s.history_live_summaries)put('history_live_summaries.json',s.history_live_summaries);
  put('session.json',{...s,endpoints:undefined});put('api_inventory.json',{generated_at:new Date().toISOString(),page:s.page,endpoints:inventory});return {root,files};
 }
